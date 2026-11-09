@@ -1,0 +1,62 @@
+<?xml version="1.0"?>
+<SineGame name="SineBeastArena" width="900" height="520" perspective="1">
+  <!--
+    ANIMAL FIGHTING DEMO — pure sine XML
+    P1 = Wolf (cyan)     WASD + Space jump + E bite/howl
+    P2 = Fox  (orange)   Arrows + Enter jump + RShift pounce
+    Collect glowing orbs for score · last sine standing vibes
+  -->
+
+  <Camera x="0" y="55" z="240" lookX="0" lookY="35" lookZ="0" fov="52" rotY="0" rotX="-18"/>
+
+  <!-- ========== FIGHTERS (animal-shaped sine blobs) ========== -->
+
+  <!-- WOLF — stocky, lower freq, cooler phase, cyan/steel -->
+  <Player id="wolf" x="-85" y="28" z="10" amp="18" freq="1.6" phase="0.2" color="#38bdf8" flap="13" speed="145" mass="1.15">
+    <Controls left="KeyA" right="KeyD" forward="KeyW" back="KeyS" up="Space" action="KeyE"/>
+  </Player>
+
+  <!-- FOX — leaner, higher freq, warmer, amber/orange -->
+  <Player id="fox" x="85" y="28" z="10" amp="15" freq="2.8" phase="1.4" color="#fb923c" flap="15" speed="175" mass="0.9">
+    <Controls left="ArrowLeft" right="ArrowRight" forward="ArrowUp" back="ArrowDown" up="Enter" action="ShiftRight"/>
+  </Player>
+
+  <!-- ========== ARENA PLATFORMS ========== -->
+
+  <Entity type="platform" id="arena_floor" x="0" y="0" z="0" amp="2" freq="0.2" phase="0" color="#475569" width="320" depth="200"/>
+  <Entity type="platform" id="ring" x="0" y="18" z="0" amp="4" freq="0.5" phase="0.3" color="#64748b" width="140" depth="90"/>
+  <Entity type="platform" id="wolf_perch" x="-110" y="42" z="-50" amp="5" freq="0.6" phase="0" color="#334155" width="70" depth="55"/>
+  <Entity type="platform" id="fox_perch" x="110" y="42" z="-50" amp="5" freq="0.65" phase="1.1" color="#334155" width="70" depth="55"/>
+  <Entity type="platform" id="sky_pad" x="0" y="75" z="-65" amp="6" freq="0.9" phase="0.7" color="#94a3b8" width="100" depth="50"/>
+  <Entity type="platform" id="rail_L" x="-140" y="25" z="40" amp="3" freq="0.4" phase="0.5" color="#1e293b" width="40" depth="120"/>
+  <Entity type="platform" id="rail_R" x="140" y="25" z="40" amp="3" freq="0.4" phase="1.5" color="#1e293b" width="40" depth="120"/>
+
+  <!-- ========== POWER ORBS ========== -->
+
+  <Entity type="collect" id="orb_center" x="0" y="45" z="0" amp="11" freq="3.4" phase="0" color="#4ade80"/>
+  <Entity type="collect" id="orb_sky" x="0" y="100" z="-65" amp="10" freq="3.1" phase="0.8" color="#a3e635"/>
+  <Entity type="collect" id="orb_wolf" x="-110" y="62" z="-50" amp="9" freq="2.9" phase="0.3" color="#22d3ee"/>
+  <Entity type="collect" id="orb_fox" x="110" y="62" z="-50" amp="9" freq="2.9" phase="1.6" color="#fdba74"/>
+  <Entity type="collect" id="orb_midL" x="-50" y="38" z="30" amp="8" freq="3.6" phase="1.0" color="#86efac"/>
+  <Entity type="collect" id="orb_midR" x="50" y="38" z="30" amp="8" freq="3.6" phase="2.0" color="#86efac"/>
+
+  <!-- ========== SPECTATOR BEASTS ========== -->
+
+  <Entity type="npc" id="owl" x="0" y="110" z="-30" amp="13" freq="1.1" phase="0.5" color="#e2e8f0"/>
+  <Entity type="npc" id="bear" x="-130" y="55" z="60" amp="20" freq="0.9" phase="0" color="#a16207"/>
+  <Entity type="npc" id="raven" x="130" y="55" z="60" amp="12" freq="2.2" phase="1.8" color="#7c3aed"/>
+
+  <!-- ========== AMBIENT ========== -->
+
+  <Entity type="particle" id="dust" x="0" y="40" z="0" amp="70" freq="0.35" phase="0" color="#38bdf8" count="28"/>
+  <Entity type="particle" id="embers" x="0" y="50" z="-40" amp="45" freq="0.55" phase="1.2" color="#fb923c" count="16"/>
+
+  <!-- ========== UI ========== -->
+
+  <Message text="SINE BEAST ARENA" x="300" y="24" size="22" color="#f1f5f9"/>
+  <Message text="WOLF (WASD+Space+E)  vs  FOX (Arrows+Enter+RShift)" x="230" y="48" size="12" color="#94a3b8"/>
+  <Message text="Claim orbs · climb perches · dominate the ring" x="260" y="66" size="11" color="#64748b"/>
+
+  <Background layers="4" speed="0.18"/>
+  <Music base="78" harmonics="6" tempo="1.15"/>
+</SineGame>
