@@ -3,42 +3,19 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Sine Game Studio — Full Pure-Sine Engine</title>
+<title>Sine Game Studio — 3D Pure-Sine XML Engine</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
 <style>
 :root {
   --bg: #030712; --card: #0f172a; --accent: #22d3ee; --green: #4ade80; --pink: #f472b6;
-  --text: #f1f5f9; --muted: #94a3b8; --border: #1e293b;
+  --text: #f1f5f9; --muted: #94a3b8; --border: #1e293b; --amber: #fbbf24;
 }
 * { box-sizing: border-box; margin: 0; padding: 0; font-family: system-ui, -apple-system, sans-serif; }
-body { background: var(--bg); color: var(--text); min-height: 100vh; padding: 1.2rem; }
-.container { max-width: 1480px; margin: 0 auto; display: flex; flex-direction: column; gap: 1.1rem; }
-header h1 { font-size: 1.7rem; color: var(--accent); text-shadow: 0 0 14px rgba(34,211,238,.35); }
-header p { color: var(--muted); font-size: .95rem; margin-top: .25rem; }
-.grid { display: grid; grid-template-columns: 360px 1fr; gap: 1.1rem; }
-@media (max-width: 1100px) { .grid { grid-template-columns: 1fr; } }
-.card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 1.15rem; }
-.card h2 { font-size: 1.05rem; color: var(--accent); margin-bottom: .7rem; }
-label { display: block; font-size: .72rem; color: var(--muted); margin: .45rem 0 .2rem; }
-input, select, textarea { width: 100%; background: #020617; border: 1px solid var(--border); color: var(--text); border-radius: 6px; padding: .4rem .55rem; font-size: .84rem; }
-textarea { height: 160px; font-family: ui-monospace, monospace; font-size: .72rem; resize: vertical; }
-button { background: var(--accent); color: #020617; border: none; border-radius: 6px; padding: .5rem 1rem; font-weight: 700; cursor: pointer; font-size: .84rem; }
-button.secondary { background: transparent; border: 1px solid var(--border); color: var(--text); }
-button.green { background: var(--green); }
-button.pink { background: var(--pink); color: #020617; }
-button:hover { filter: brightness(1.12); }
-.row { display: flex; gap: .5rem; flex-wrap: wrap; margin-top: .55rem; }
-canvas { background: #000; border-radius: 8px; width: 100%; display: block; border: 1px solid #1e293b; }
-.status { font-size: .78rem; color: var(--accent); margin-top: .45rem; min-height: 1.2em; }
-.tabs { display: flex; gap: .35rem; margin-bottom: .7rem; flex-wrap: wrap; }
-.tab { padding: .32rem .75rem; border-radius: 6px; background: #1e293b; cursor: pointer; font-size: .78rem; user-select: none; }
-.tab.active { background: var(--accent); color: #020617; font-weight: 700; }
-.hud { position: absolute; top: 12px; left: 14px; font-family: ui-monospace, monospace; font-size: .8rem; color: #e2e8f0; text-shadow: 0 0 6px #000; pointer-events: none; }
-.canvas-wrap { position: relative; }
-
+body { background: var(--bg); color: var(--text); min-height: 100vh; padding: 1rem; }
+.container { max-width: 1520px; margin: 0 auto; display: flex; flex-direction: column; gap: 0.9rem; }
 .sine-nav {
-  display: flex; flex-wrap: wrap; gap: 0.4rem; margin-bottom: 0.9rem;
-  padding: 0.5rem 0.65rem; background: #0f172a; border: 1px solid #1e293b;
+  display: flex; flex-wrap: wrap; gap: 0.4rem; margin-bottom: 0.2rem;
+  padding: 0.45rem 0.6rem; background: #0f172a; border: 1px solid #1e293b;
   border-radius: 8px; font-size: 0.78rem;
 }
 .sine-nav a {
@@ -48,12 +25,46 @@ canvas { background: #000; border-radius: 8px; width: 100%; display: block; bord
 .sine-nav a:hover { color: #38bdf8; background: rgba(56,189,248,0.1); }
 .sine-nav a.active { color: #22d3ee; background: rgba(34,211,238,0.12); font-weight: 600; }
 .sine-nav .sep { color: #334155; padding: 0 0.2rem; }
-
+header h1 { font-size: 1.55rem; color: var(--accent); text-shadow: 0 0 14px rgba(34,211,238,.35); }
+header p { color: var(--muted); font-size: .88rem; margin-top: .2rem; }
+.grid { display: grid; grid-template-columns: 380px 1fr; gap: 1rem; }
+@media (max-width: 1100px) { .grid { grid-template-columns: 1fr; } }
+.card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 1rem; }
+.card h2 { font-size: 0.98rem; color: var(--accent); margin-bottom: .55rem; }
+label { display: block; font-size: .7rem; color: var(--muted); margin: .35rem 0 .15rem; }
+input, select, textarea { width: 100%; background: #020617; border: 1px solid var(--border); color: var(--text); border-radius: 6px; padding: .35rem .5rem; font-size: .82rem; }
+textarea { height: 210px; font-family: ui-monospace, monospace; font-size: .68rem; resize: vertical; line-height: 1.35; }
+button { background: var(--accent); color: #020617; border: none; border-radius: 6px; padding: .45rem .9rem; font-weight: 700; cursor: pointer; font-size: .8rem; }
+button.secondary { background: transparent; border: 1px solid var(--border); color: var(--text); }
+button.green { background: var(--green); }
+button.pink { background: var(--pink); color: #020617; }
+button.amber { background: var(--amber); color: #020617; }
+button:hover { filter: brightness(1.12); }
+.row { display: flex; gap: .4rem; flex-wrap: wrap; margin-top: .45rem; }
+canvas { background: #000; border-radius: 8px; width: 100%; display: block; border: 1px solid #1e293b; cursor: crosshair; }
+.status { font-size: .75rem; color: var(--accent); margin-top: .35rem; min-height: 1.15em; }
+.tabs { display: flex; gap: .3rem; margin-bottom: .55rem; flex-wrap: wrap; }
+.tab { padding: .28rem .65rem; border-radius: 6px; background: #1e293b; cursor: pointer; font-size: .74rem; user-select: none; }
+.tab.active { background: rgba(34,211,238,0.2); color: var(--accent); }
+.hud-bar {
+  display: flex; justify-content: space-between; align-items: center;
+  font-size: .78rem; color: var(--muted); margin-top: .4rem; gap: .5rem; flex-wrap: wrap;
+}
+.hud-bar span { color: var(--green); font-weight: 600; }
+.controls-hint {
+  font-size: .68rem; color: var(--muted); background: #020617; border: 1px solid var(--border);
+  border-radius: 6px; padding: .45rem .55rem; margin-top: .4rem; line-height: 1.4;
+  font-family: ui-monospace, monospace; white-space: pre-wrap;
+}
+.help {
+  font-size: .72rem; color: var(--muted); line-height: 1.45; margin-top: .35rem;
+}
+code { color: var(--green); font-size: .7rem; }
 </style>
 </head>
 <body>
 <div class="container">
-    <nav class="sine-nav">
+  <nav class="sine-nav">
     <a href="index.html">Hub</a>
     <span class="sep">·</span>
     <a href="studio.html">Studio</a>
@@ -63,213 +74,350 @@ canvas { background: #000; border-radius: 8px; width: 100%; display: block; bord
   </nav>
 
   <header>
-	<h1>Sine Game Studio</h1>
-	<p>Full pure-sine engine — graphics, sound, motion, levels, particles. Author in XML, export ZIP packages. Works alongside Studio / Vector / Matrix.</p>
+    <h1>Sine Game Studio — 3D Pure-Sine XML Engine</h1>
+    <p>Everything is XML: players, 3D positions, sine parameters, camera, music, and custom dual-player controls. No external assets.</p>
   </header>
 
   <div class="grid">
-	<!-- LEFT -->
-	<div style="display:flex;flex-direction:column;gap:.9rem;">
-	  <div class="card">
-		<h2>Level XML</h2>
-		<textarea id="gameXml" spellcheck="false"></textarea>
-		<div class="row">
-		  <button onclick="loadXml()">Load XML</button>
-		  <button class="secondary" onclick="exportXmlToEditor()">Sync → Editor</button>
-		  <button class="secondary" onclick="resetDemo()">Reset Demo</button>
-		</div>
-	  </div>
+    <!-- LEFT PANEL -->
+    <div class="card">
+      <h2>Game XML</h2>
+      <div class="tabs">
+        <div class="tab active" data-mode="play" onclick="setMode('play')">Play</div>
+        <div class="tab" data-mode="scope" onclick="setMode('scope')">Scope</div>
+        <div class="tab" data-mode="wire" onclick="setMode('wire')">Wire 3D</div>
+      </div>
+      <textarea id="gameXml" spellcheck="false"></textarea>
+      <div class="row">
+        <button onclick="loadXml()">Load XML</button>
+        <button class="secondary" onclick="exportXmlToEditor()">Sync → Editor</button>
+        <button class="secondary" onclick="resetDemo()">Reset Demo</button>
+      </div>
+      <div class="row">
+        <button class="green" id="playBtn" onclick="togglePlay()">▶ Play</button>
+        <button class="pink" onclick="startMusic()">Music</button>
+        <button class="secondary" onclick="stopMusic()">Mute</button>
+        <button class="amber" onclick="exportPackage()">Export ZIP</button>
+      </div>
+      <div class="status" id="status">Ready</div>
+      <div class="controls-hint" id="controlsHint">Controls load from XML…</div>
+      <p class="help">
+        <strong>XML schema:</strong> <code>&lt;Player id="p1" …&gt;</code> + nested <code>&lt;Controls …/&gt;</code>,
+        <code>&lt;Entity type="…" z="…" /&gt;</code>, <code>&lt;Camera /&gt;</code>, <code>&lt;Music /&gt;</code>, <code>&lt;Message /&gt;</code>.
+        Two players = two <code>&lt;Player&gt;</code> blocks with their own key maps.
+      </p>
+    </div>
 
-	  <div class="card">
-		<h2>Live Controls</h2>
-		<label>Player Amplitude</label>
-		<input type="range" id="pAmp" min="6" max="36" value="16" oninput="updateLive()">
-		<label>Player Frequency</label>
-		<input type="range" id="pFreq" min="0.6" max="5" step="0.1" value="2.1" oninput="updateLive()">
-		<label>Music Base (Hz)</label>
-		<input type="range" id="mBase" min="55" max="196" value="98" oninput="updateLive()">
-		<div class="row" style="margin-top:.9rem;">
-		  <button class="green" id="playBtn" onclick="togglePlay()">▶ Play</button>
-		  <button class="pink" onclick="exportPackage()">Export ZIP</button>
-		</div>
-		<div class="status" id="status">Arrow keys / WASD + Space to flap · Collect the glowing signs</div>
-	  </div>
-	</div>
-
-	<!-- RIGHT -->
-	<div class="card" style="padding:0;overflow:hidden;">
-	  <div style="padding:.9rem 1.1rem 0;">
-		<div class="tabs">
-		  <div class="tab active" data-mode="play" onclick="setMode('play')">Play</div>
-		  <div class="tab" data-mode="scope" onclick="setMode('scope')">Wave Scope</div>
-		  <div class="tab" data-mode="edit" onclick="setMode('edit')">Entities</div>
-		</div>
-	  </div>
-	  <div class="canvas-wrap">
-		<canvas id="gameCanvas" width="720" height="400"></canvas>
-		<div class="hud" id="hud">Score: 0</div>
-	  </div>
-	  <div style="padding:.55rem 1rem;font-size:.72rem;color:var(--muted);">
-		Everything is <code>Math.sin</code> sums · Compatible with your OpenSCAD → vector → OGG pipeline
-	  </div>
-	</div>
+    <!-- RIGHT: VIEWPORT -->
+    <div class="card">
+      <h2>Viewport</h2>
+      <canvas id="gameCanvas" width="900" height="520"></canvas>
+      <div class="hud-bar">
+        <div>P1 Score: <span id="score1">0</span> · P2 Score: <span id="score2">0</span></div>
+        <div id="hudMode">Mode: Play · 3D Sine</div>
+        <div id="hudCam">Cam</div>
+      </div>
+    </div>
   </div>
 </div>
 
 <script>
+/* =========================================================
+   SINE 3D XML GAME ENGINE
+   - Pure sine geometry
+   - Everything from XML
+   - Dual players + custom controls
+   ========================================================= */
+
 const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d');
-const W = 720, H = 400;
-let mode = 'play';
+let W = canvas.width, H = canvas.height;
+
+const keys = Object.create(null);
 let running = false;
-let t = 0;
-let score = 0;
 let animId = null;
+let t = 0;
+let mode = 'play'; // play | scope | wire
 let audioCtx = null;
 let musicNodes = [];
-let keys = {};
+let scores = { p1: 0, p2: 0 };
 
-// ---------- Default Demo Level ----------
+// ---------- Default 3D dual-player demo ----------
 const demoXml = `<?xml version="1.0"?>
-<SineGame name="SinePlatformer" width="720" height="400">
-  <!-- Player starts on the left -->
-  <Player x="70" y="280" amp="15" freq="2.0" phase="0" color="#22d3ee" flap="11"/>
+<SineGame name="SineArena3D" width="900" height="520" perspective="1">
+  <!-- Camera (look-at style, orbitable) -->
+  <Camera x="0" y="40" z="220" lookX="0" lookY="20" lookZ="0" fov="55" rotY="0" rotX="-12"/>
 
-  <!-- Solid platforms (the "ground" pieces) -->
-  <Entity type="platform" id="ground1" x="120" y="340" amp="4" freq="0.3" phase="0" color="#64748b" width="180"/>
-  <Entity type="platform" id="ground2" x="340" y="340" amp="3" freq="0.4" phase="1" color="#64748b" width="160"/>
-  <Entity type="platform" id="ground3" x="560" y="340" amp="4" freq="0.35" phase="2" color="#64748b" width="200"/>
+  <!-- Player 1 — WASD + Space -->
+  <Player id="p1" x="-60" y="30" z="0" amp="14" freq="2.2" phase="0" color="#22d3ee" flap="11" speed="160" mass="1">
+    <Controls left="KeyA" right="KeyD" forward="KeyW" back="KeyS" up="Space" action="KeyE"/>
+  </Player>
 
-  <!-- Floating platforms -->
-  <Entity type="platform" id="float1" x="220" y="260" amp="6" freq="0.8" phase="0" color="#94a3b8" width="100"/>
-  <Entity type="platform" id="float2" x="400" y="200" amp="5" freq="1.1" phase="1.5" color="#94a3b8" width="90"/>
-  <Entity type="platform" id="float3" x="580" y="160" amp="7" freq="0.9" phase="0.7" color="#94a3b8" width="110"/>
-  <Entity type="platform" id="float4" x="300" y="120" amp="5" freq="1.3" phase="2.2" color="#94a3b8" width="80"/>
+  <!-- Player 2 — Arrows + Enter -->
+  <Player id="p2" x="60" y="30" z="0" amp="14" freq="2.0" phase="1.2" color="#f472b6" flap="11" speed="160" mass="1">
+    <Controls left="ArrowLeft" right="ArrowRight" forward="ArrowUp" back="ArrowDown" up="Enter" action="ShiftRight"/>
+  </Player>
 
-  <!-- Collectible signs (the goal items) -->
-  <Entity type="collect" id="sign1" x="220" y="220" amp="9" freq="3.0" phase="0" color="#4ade80"/>
-  <Entity type="collect" id="sign2" x="400" y="160" amp="9" freq="2.7" phase="1.2" color="#4ade80"/>
-  <Entity type="collect" id="sign3" x="580" y="120" amp="10" freq="3.3" phase="0.5" color="#4ade80"/>
-  <Entity type="collect" id="sign4" x="300" y="80" amp="8" freq="3.6" phase="2.0" color="#4ade80"/>
-  <Entity type="collect" id="sign5" x="480" y="280" amp="9" freq="2.9" phase="1.8" color="#4ade80"/>
+  <!-- Platforms (3D) -->
+  <Entity type="platform" id="floor" x="0" y="0" z="0" amp="3" freq="0.25" phase="0" color="#64748b" width="280" depth="180"/>
+  <Entity type="platform" id="padL" x="-90" y="45" z="-40" amp="5" freq="0.7" phase="0" color="#94a3b8" width="70" depth="50"/>
+  <Entity type="platform" id="padR" x="90" y="45" z="-40" amp="5" freq="0.8" phase="1" color="#94a3b8" width="70" depth="50"/>
+  <Entity type="platform" id="padC" x="0" y="80" z="-70" amp="6" freq="1.0" phase="0.5" color="#94a3b8" width="90" depth="55"/>
 
-  <!-- Friendly NPC -->
-  <Entity type="npc" id="guide" x="480" y="290" amp="13" freq="1.4" phase="0.8" color="#f472b6"/>
+  <!-- Collectibles -->
+  <Entity type="collect" id="c1" x="-90" y="70" z="-40" amp="9" freq="3.0" phase="0" color="#4ade80"/>
+  <Entity type="collect" id="c2" x="90" y="70" z="-40" amp="9" freq="2.8" phase="1" color="#4ade80"/>
+  <Entity type="collect" id="c3" x="0" y="105" z="-70" amp="10" freq="3.2" phase="0.6" color="#4ade80"/>
+  <Entity type="collect" id="c4" x="0" y="35" z="50" amp="8" freq="2.5" phase="2" color="#4ade80"/>
 
-  <!-- Ambient particles -->
-  <Entity type="particle" id="sparkles" x="360" y="180" amp="55" freq="0.35" phase="0" color="#38bdf8" count="22"/>
+  <!-- NPC -->
+  <Entity type="npc" id="guide" x="0" y="35" z="-20" amp="12" freq="1.3" phase="0.4" color="#fbbf24"/>
 
-  <!-- UI text -->
-  <Message text="SINE PLATFORMER" x="210" y="32" size="24" color="#e2e8f0"/>
-  <Message text="Collect all glowing signs" x="230" y="58" size="14" color="#94a3b8"/>
+  <!-- Particles -->
+  <Entity type="particle" id="sparks" x="0" y="60" z="0" amp="50" freq="0.4" phase="0" color="#38bdf8" count="24"/>
 
-  <!-- Background + Music -->
-  <Background layers="4" speed="0.28"/>
-  <Music base="87" harmonics="5" tempo="0.95"/>
+  <!-- UI -->
+  <Message text="SINE ARENA 3D" x="320" y="28" size="22" color="#e2e8f0"/>
+  <Message text="P1 WASD+Space · P2 Arrows+Enter · collect green orbs" x="250" y="52" size="12" color="#94a3b8"/>
+
+  <Background layers="3" speed="0.22"/>
+  <Music base="92" harmonics="5" tempo="1.0"/>
 </SineGame>`;
 
+// ---------- Runtime state ----------
 let game = {
-  name: 'SinePlatformer',
-  player: { x: 90, y: 200, vx: 0, vy: 0, amp: 16, freq: 2.1, phase: 0, color: '#22d3ee', flap: 9 },
+  name: 'SineArena3D',
+  perspective: true,
+  players: [],
   entities: [],
   messages: [],
-  bgLayers: 4,
-  bgSpeed: 0.35,
-  music: { base: 98, harmonics: 5, tempo: 1.05 }
+  camera: { x: 0, y: 40, z: 220, lookX: 0, lookY: 20, lookZ: 0, fov: 55, rotY: 0, rotX: -12 },
+  bgLayers: 3,
+  bgSpeed: 0.22,
+  music: { base: 92, harmonics: 5, tempo: 1 }
 };
 
 // ---------- Input ----------
 window.addEventListener('keydown', e => {
   keys[e.code] = true;
-  if (['ArrowUp','ArrowDown','ArrowLeft','ArrowRight','Space','KeyW','KeyA','KeyS','KeyD'].includes(e.code)) e.preventDefault();
+  // prevent scroll on game keys
+  if (/Arrow|Space|KeyW|KeyA|KeyS|KeyD|Enter|Shift/.test(e.code)) e.preventDefault();
 });
 window.addEventListener('keyup', e => { keys[e.code] = false; });
 
-// ---------- XML ----------
+// Mouse orbit (optional polish)
+let dragging = false, lastMX = 0, lastMY = 0;
+canvas.addEventListener('mousedown', e => { dragging = true; lastMX = e.clientX; lastMY = e.clientY; });
+window.addEventListener('mouseup', () => { dragging = false; });
+window.addEventListener('mousemove', e => {
+  if (!dragging || mode === 'scope') return;
+  const dx = e.clientX - lastMX, dy = e.clientY - lastMY;
+  lastMX = e.clientX; lastMY = e.clientY;
+  game.camera.rotY += dx * 0.4;
+  game.camera.rotX = Math.max(-80, Math.min(20, game.camera.rotX + dy * 0.3));
+});
+
+// ---------- Math helpers ----------
+function deg2rad(d) { return d * Math.PI / 180; }
+
+function project(x, y, z, cam) {
+  // Camera orbit around look-at
+  const ry = deg2rad(cam.rotY);
+  const rx = deg2rad(cam.rotX);
+  // translate relative to look point
+  let dx = x - cam.lookX;
+  let dy = y - cam.lookY;
+  let dz = z - cam.lookZ;
+  // rotate Y
+  let x1 = dx * Math.cos(ry) - dz * Math.sin(ry);
+  let z1 = dx * Math.sin(ry) + dz * Math.cos(ry);
+  // rotate X
+  let y1 = dy * Math.cos(rx) - z1 * Math.sin(rx);
+  let z2 = dy * Math.sin(rx) + z1 * Math.cos(rx);
+  // move back by camera distance
+  z2 += cam.z;
+  const fov = cam.fov || 55;
+  const scale = (H * 0.55) / Math.tan(deg2rad(fov / 2));
+  if (z2 < 8) z2 = 8;
+  const sx = W / 2 + (x1 * scale) / z2;
+  const sy = H / 2 - (y1 * scale) / z2;
+  const depth = z2;
+  return { x: sx, y: sy, depth, visible: z2 > 5 };
+}
+
+function sineBlob3D(cx, cy, cz, amp, freq, phase, time, points = 24) {
+  const pts = [];
+  for (let i = 0; i <= points; i++) {
+    const a = (i / points) * Math.PI * 2;
+    const r = amp * (0.62 + 0.38 * Math.sin(a * 2.6 + time * 1.7 + phase));
+    const px = cx + Math.cos(a) * r + Math.sin(time * freq + phase) * 4;
+    const py = cy + Math.sin(a) * r * 0.78 + Math.cos(time * freq * 0.6 + phase) * 3;
+    const pz = cz + Math.sin(a * 1.5 + time * 0.8) * amp * 0.25;
+    pts.push({ x: px, y: py, z: pz });
+  }
+  return pts;
+}
+
+// ---------- XML parser ----------
+function attr(el, name, def) {
+  const v = el.getAttribute(name);
+  return v === null || v === '' ? def : v;
+}
+function num(el, name, def) {
+  const v = el.getAttribute(name);
+  return v === null || v === '' ? def : +v;
+}
+
 function loadXml() {
   const txt = document.getElementById('gameXml').value;
   try {
-	const doc = new DOMParser().parseFromString(txt, 'text/xml');
-	const root = doc.querySelector('SineGame');
-	if (!root) throw new Error('Missing <SineGame>');
+    const doc = new DOMParser().parseFromString(txt, 'text/xml');
+    if (doc.querySelector('parsererror')) throw new Error('Malformed XML');
+    const root = doc.querySelector('SineGame');
+    if (!root) throw new Error('Missing <SineGame>');
 
-	game.name = root.getAttribute('name') || 'SineGame';
-	const p = root.querySelector('Player');
-	if (p) {
-	  game.player = {
-		x: +p.getAttribute('x') || 90,
-		y: +p.getAttribute('y') || 200,
-		vx: 0, vy: 0,
-		amp: +p.getAttribute('amp') || 16,
-		freq: +p.getAttribute('freq') || 2.1,
-		phase: +p.getAttribute('phase') || 0,
-		color: p.getAttribute('color') || '#22d3ee',
-		flap: +p.getAttribute('flap') || 9
-	  };
-	}
+    game.name = attr(root, 'name', 'SineGame');
+    game.perspective = attr(root, 'perspective', '1') !== '0';
+    const w = num(root, 'width', 900);
+    const h = num(root, 'height', 520);
+    if (w !== W || h !== H) {
+      W = w; H = h;
+      canvas.width = W; canvas.height = H;
+    }
 
-	game.entities = [];
-	root.querySelectorAll('Entity').forEach(e => {
-	  game.entities.push({
-		type: e.getAttribute('type') || 'npc',
-		id: e.getAttribute('id') || 'e',
-		x: +e.getAttribute('x') || 300,
-		y: +e.getAttribute('y') || 180,
-		amp: +e.getAttribute('amp') || 10,
-		freq: +e.getAttribute('freq') || 1.5,
-		phase: +e.getAttribute('phase') || 0,
-		color: e.getAttribute('color') || '#f472b6',
-		width: +e.getAttribute('width') || 80,
-		count: +e.getAttribute('count') || 12,
-		collected: false
-	  });
-	});
+    // Camera
+    const cam = root.querySelector('Camera');
+    if (cam) {
+      game.camera = {
+        x: num(cam, 'x', 0),
+        y: num(cam, 'y', 40),
+        z: num(cam, 'z', 220),
+        lookX: num(cam, 'lookX', 0),
+        lookY: num(cam, 'lookY', 20),
+        lookZ: num(cam, 'lookZ', 0),
+        fov: num(cam, 'fov', 55),
+        rotY: num(cam, 'rotY', 0),
+        rotX: num(cam, 'rotX', -12)
+      };
+    }
 
-	game.messages = [];
-	root.querySelectorAll('Message').forEach(m => {
-	  game.messages.push({
-		text: m.getAttribute('text') || '',
-		x: +m.getAttribute('x') || 100,
-		y: +m.getAttribute('y') || 40,
-		size: +m.getAttribute('size') || 24,
-		color: m.getAttribute('color') || '#e2e8f0'
-	  });
-	});
+    // Players (1 or 2+)
+    game.players = [];
+    root.querySelectorAll('Player').forEach((p, idx) => {
+      const ctrl = p.querySelector('Controls');
+      const id = attr(p, 'id', idx === 0 ? 'p1' : 'p2');
+      game.players.push({
+        id,
+        x: num(p, 'x', idx === 0 ? -50 : 50),
+        y: num(p, 'y', 30),
+        z: num(p, 'z', 0),
+        vx: 0, vy: 0, vz: 0,
+        amp: num(p, 'amp', 14),
+        freq: num(p, 'freq', 2),
+        phase: num(p, 'phase', 0),
+        color: attr(p, 'color', idx === 0 ? '#22d3ee' : '#f472b6'),
+        flap: num(p, 'flap', 11),
+        speed: num(p, 'speed', 150),
+        mass: num(p, 'mass', 1),
+        controls: {
+          left: attr(ctrl || p, 'left', idx === 0 ? 'KeyA' : 'ArrowLeft'),
+          right: attr(ctrl || p, 'right', idx === 0 ? 'KeyD' : 'ArrowRight'),
+          forward: attr(ctrl || p, 'forward', idx === 0 ? 'KeyW' : 'ArrowUp'),
+          back: attr(ctrl || p, 'back', idx === 0 ? 'KeyS' : 'ArrowDown'),
+          up: attr(ctrl || p, 'up', idx === 0 ? 'Space' : 'Enter'),
+          action: attr(ctrl || p, 'action', idx === 0 ? 'KeyE' : 'ShiftRight')
+        }
+      });
+    });
+    if (game.players.length === 0) {
+      // fallback single player
+      game.players.push({
+        id: 'p1', x: 0, y: 30, z: 0, vx: 0, vy: 0, vz: 0,
+        amp: 14, freq: 2, phase: 0, color: '#22d3ee', flap: 11, speed: 150, mass: 1,
+        controls: { left: 'KeyA', right: 'KeyD', forward: 'KeyW', back: 'KeyS', up: 'Space', action: 'KeyE' }
+      });
+    }
 
-	const bg = root.querySelector('Background');
-	if (bg) {
-	  game.bgLayers = +bg.getAttribute('layers') || 3;
-	  game.bgSpeed = +bg.getAttribute('speed') || 0.4;
-	}
-	const mus = root.querySelector('Music');
-	if (mus) {
-	  game.music.base = +mus.getAttribute('base') || 110;
-	  game.music.harmonics = +mus.getAttribute('harmonics') || 4;
-	  game.music.tempo = +mus.getAttribute('tempo') || 1.1;
-	}
+    // Entities
+    game.entities = [];
+    root.querySelectorAll('Entity').forEach(e => {
+      game.entities.push({
+        type: attr(e, 'type', 'npc'),
+        id: attr(e, 'id', 'e'),
+        x: num(e, 'x', 0),
+        y: num(e, 'y', 20),
+        z: num(e, 'z', 0),
+        amp: num(e, 'amp', 10),
+        freq: num(e, 'freq', 1.5),
+        phase: num(e, 'phase', 0),
+        color: attr(e, 'color', '#f472b6'),
+        width: num(e, 'width', 80),
+        depth: num(e, 'depth', 60),
+        count: num(e, 'count', 12),
+        collected: false
+      });
+    });
 
-	score = 0;
-	syncSliders();
-	setStatus('XML loaded');
-	draw();
+    // Messages
+    game.messages = [];
+    root.querySelectorAll('Message').forEach(m => {
+      game.messages.push({
+        text: attr(m, 'text', ''),
+        x: num(m, 'x', 100),
+        y: num(m, 'y', 40),
+        size: num(m, 'size', 20),
+        color: attr(m, 'color', '#e2e8f0')
+      });
+    });
+
+    const bg = root.querySelector('Background');
+    if (bg) {
+      game.bgLayers = num(bg, 'layers', 3);
+      game.bgSpeed = num(bg, 'speed', 0.3);
+    }
+    const mus = root.querySelector('Music');
+    if (mus) {
+      game.music.base = num(mus, 'base', 100);
+      game.music.harmonics = num(mus, 'harmonics', 4);
+      game.music.tempo = num(mus, 'tempo', 1);
+    }
+
+    scores = { p1: 0, p2: 0 };
+    updateControlsHint();
+    setStatus(`Loaded “${game.name}” — ${game.players.length} player(s), ${game.entities.length} entities`);
+    draw();
   } catch (err) {
-	setStatus('XML error: ' + err.message);
+    setStatus('XML error: ' + err.message);
   }
 }
 
+function updateControlsHint() {
+  const lines = game.players.map(p => {
+    const c = p.controls;
+    return `${p.id.toUpperCase()} [${p.color}]: ${c.forward}/${c.back}/${c.left}/${c.right} move · ${c.up} jump · ${c.action} action`;
+  });
+  document.getElementById('controlsHint').textContent = lines.join('\n') || 'No players';
+}
+
 function exportXmlToEditor() {
-  let xml = `<?xml version="1.0"?>\n<SineGame name="${game.name}" width="${W}" height="${H}">\n`;
-  const p = game.player;
-  xml += `  <Player x="${Math.round(p.x)}" y="${Math.round(p.y)}" amp="${p.amp}" freq="${p.freq}" phase="${p.phase}" color="${p.color}" flap="${p.flap}"/>\n`;
+  let xml = `<?xml version="1.0"?>\n<SineGame name="${game.name}" width="${W}" height="${H}" perspective="${game.perspective ? 1 : 0}">\n`;
+  const c = game.camera;
+  xml += `  <Camera x="${c.x}" y="${c.y}" z="${c.z}" lookX="${c.lookX}" lookY="${c.lookY}" lookZ="${c.lookZ}" fov="${c.fov}" rotY="${Math.round(c.rotY)}" rotX="${Math.round(c.rotX)}"/>\n`;
+  game.players.forEach(p => {
+    xml += `  <Player id="${p.id}" x="${Math.round(p.x)}" y="${Math.round(p.y)}" z="${Math.round(p.z)}" amp="${p.amp}" freq="${p.freq}" phase="${p.phase}" color="${p.color}" flap="${p.flap}" speed="${p.speed}" mass="${p.mass}">\n`;
+    const k = p.controls;
+    xml += `    <Controls left="${k.left}" right="${k.right}" forward="${k.forward}" back="${k.back}" up="${k.up}" action="${k.action}"/>\n`;
+    xml += `  </Player>\n`;
+  });
   game.entities.forEach(e => {
-	if (e.collected) return;
-	let extra = '';
-	if (e.type === 'platform') extra = ` width="${e.width}"`;
-	if (e.type === 'particle') extra = ` count="${e.count}"`;
-	xml += `  <Entity type="${e.type}" id="${e.id}" x="${Math.round(e.x)}" y="${Math.round(e.y)}" amp="${e.amp}" freq="${e.freq}" phase="${e.phase}" color="${e.color}"${extra}/>\n`;
+    if (e.collected) return;
+    let extra = '';
+    if (e.type === 'platform') extra = ` width="${e.width}" depth="${e.depth}"`;
+    if (e.type === 'particle') extra = ` count="${e.count}"`;
+    xml += `  <Entity type="${e.type}" id="${e.id}" x="${Math.round(e.x)}" y="${Math.round(e.y)}" z="${Math.round(e.z)}" amp="${e.amp}" freq="${e.freq}" phase="${e.phase}" color="${e.color}"${extra}/>\n`;
   });
   game.messages.forEach(m => {
-	xml += `  <Message text="${m.text}" x="${m.x}" y="${m.y}" size="${m.size}" color="${m.color}"/>\n`;
+    xml += `  <Message text="${m.text.replace(/"/g, '&quot;')}" x="${m.x}" y="${m.y}" size="${m.size}" color="${m.color}"/>\n`;
   });
   xml += `  <Background layers="${game.bgLayers}" speed="${game.bgSpeed}"/>\n`;
   xml += `  <Music base="${game.music.base}" harmonics="${game.music.harmonics}" tempo="${game.music.tempo}"/>\n`;
@@ -283,94 +431,130 @@ function resetDemo() {
   loadXml();
 }
 
-// ---------- Sine Drawing ----------
-function sineBlob(x, y, amp, freq, phase, time, points = 28) {
-  const pts = [];
-  for (let i = 0; i <= points; i++) {
-	const a = (i / points) * Math.PI * 2;
-	const r = amp * (0.65 + 0.35 * Math.sin(a * 2.7 + time * 1.8 + phase));
-	const px = x + Math.cos(a) * r + Math.sin(time * freq + phase) * 5;
-	const py = y + Math.sin(a) * r * 0.82 + Math.cos(time * freq * 0.65 + phase) * 3.5;
-	pts.push({ x: px, y: py });
+// ---------- Drawing ----------
+function drawBackground(time) {
+  for (let L = 0; L < game.bgLayers; L++) {
+    const speed = game.bgSpeed * (0.2 + L * 0.3);
+    const amp = 6 + L * 4;
+    const yBase = H * 0.72 + L * 18;
+    ctx.beginPath();
+    ctx.moveTo(0, H);
+    for (let x = 0; x <= W; x += 6) {
+      const y = yBase
+        + Math.sin(x * 0.008 + time * speed + L) * amp
+        + Math.sin(x * 0.02 + time * speed * 1.5) * amp * 0.3;
+      ctx.lineTo(x, y);
+    }
+    ctx.lineTo(W, H);
+    ctx.closePath();
+    ctx.fillStyle = `hsla(${200 + L * 15}, 55%, ${8 + L * 3}%, 0.5)`;
+    ctx.fill();
   }
-  return pts;
+}
+
+function strokeProjectedPath(pts3, color, width, glow) {
+  const projected = pts3.map(p => project(p.x, p.y, p.z, game.camera)).filter(p => p.visible);
+  if (projected.length < 2) return;
+  // simple painter: sort by depth average
+  ctx.beginPath();
+  ctx.moveTo(projected[0].x, projected[0].y);
+  for (let i = 1; i < projected.length; i++) ctx.lineTo(projected[i].x, projected[i].y);
+  ctx.strokeStyle = color;
+  ctx.lineWidth = width;
+  if (glow) {
+    ctx.shadowColor = color;
+    ctx.shadowBlur = glow;
+  }
+  ctx.stroke();
+  ctx.shadowBlur = 0;
 }
 
 function drawEntity(ent, time) {
   if (ent.collected) return;
+  const cam = game.camera;
 
   if (ent.type === 'platform') {
-	const wobble = Math.sin(time * ent.freq + ent.phase) * ent.amp * 0.4;
-	ctx.beginPath();
-	ctx.moveTo(ent.x - ent.width/2, ent.y + wobble);
-	for (let i = 0; i <= 12; i++) {
-	  const px = ent.x - ent.width/2 + (i/12)*ent.width;
-	  const py = ent.y + wobble + Math.sin(i * 0.9 + time * 2) * 2.5;
-	  ctx.lineTo(px, py);
-	}
-	ctx.strokeStyle = ent.color;
-	ctx.lineWidth = 4;
-	ctx.shadowColor = ent.color;
-	ctx.shadowBlur = 8;
-	ctx.stroke();
-	ctx.shadowBlur = 0;
-	return;
+    const wobble = Math.sin(time * ent.freq + ent.phase) * ent.amp * 0.35;
+    const hw = ent.width / 2, hd = ent.depth / 2;
+    const y = ent.y + wobble;
+    // top rectangle corners
+    const corners = [
+      { x: ent.x - hw, y, z: ent.z - hd },
+      { x: ent.x + hw, y, z: ent.z - hd },
+      { x: ent.x + hw, y, z: ent.z + hd },
+      { x: ent.x - hw, y, z: ent.z + hd },
+      { x: ent.x - hw, y, z: ent.z - hd }
+    ];
+    strokeProjectedPath(corners, ent.color, 3.5, 6);
+    // soft sine edge detail
+    const detail = [];
+    for (let i = 0; i <= 10; i++) {
+      const t = i / 10;
+      detail.push({
+        x: ent.x - hw + t * ent.width,
+        y: y + Math.sin(t * 6 + time * 2) * 2,
+        z: ent.z
+      });
+    }
+    strokeProjectedPath(detail, ent.color, 1.5, 0);
+    return;
   }
 
   if (ent.type === 'particle') {
-	for (let i = 0; i < ent.count; i++) {
-	  const a = (i / ent.count) * Math.PI * 2 + time * ent.freq;
-	  const r = ent.amp * (0.4 + 0.6 * Math.sin(time * 1.5 + i));
-	  const px = ent.x + Math.cos(a) * r;
-	  const py = ent.y + Math.sin(a * 1.3) * r * 0.7;
-	  ctx.beginPath();
-	  ctx.arc(px, py, 2.2, 0, Math.PI * 2);
-	  ctx.fillStyle = ent.color + '99';
-	  ctx.fill();
-	}
-	return;
+    for (let i = 0; i < ent.count; i++) {
+      const a = (i / ent.count) * Math.PI * 2 + time * ent.freq;
+      const r = ent.amp * (0.4 + 0.6 * Math.sin(time * 0.7 + i));
+      const px = ent.x + Math.cos(a) * r;
+      const py = ent.y + Math.sin(time * 1.2 + i * 0.5) * 18;
+      const pz = ent.z + Math.sin(a * 1.3) * r * 0.6;
+      const pr = project(px, py, pz, cam);
+      if (!pr.visible) continue;
+      const size = Math.max(1.2, 4 * (80 / pr.depth));
+      ctx.beginPath();
+      ctx.arc(pr.x, pr.y, size, 0, Math.PI * 2);
+      ctx.fillStyle = ent.color;
+      ctx.globalAlpha = 0.7;
+      ctx.fill();
+      ctx.globalAlpha = 1;
+    }
+    return;
   }
 
-  // npc / collect / default
-  const pts = sineBlob(ent.x, ent.y, ent.amp, ent.freq, ent.phase, time);
-  ctx.beginPath();
-  ctx.moveTo(pts[0].x, pts[0].y);
-  for (let i = 1; i < pts.length; i++) ctx.lineTo(pts[i].x, pts[i].y);
-  ctx.closePath();
-  ctx.strokeStyle = ent.color;
-  ctx.lineWidth = ent.type === 'collect' ? 2.8 : 2.2;
-  ctx.shadowColor = ent.color;
-  ctx.shadowBlur = ent.type === 'collect' ? 16 : 10;
-  ctx.stroke();
-  ctx.shadowBlur = 0;
-
-  if (ent.type === 'collect') {
-	ctx.beginPath();
-	ctx.arc(ent.x, ent.y, 3, 0, Math.PI * 2);
-	ctx.fillStyle = '#fff';
-	ctx.fill();
+  // collect / npc / default = sine blob
+  const pts = sineBlob3D(ent.x, ent.y, ent.z, ent.amp, ent.freq, ent.phase, time, 28);
+  strokeProjectedPath(pts, ent.color, ent.type === 'collect' ? 2.4 : 2.2, ent.type === 'collect' ? 12 : 8);
+  // eye for npc
+  if (ent.type === 'npc') {
+    const eye = project(ent.x + 5, ent.y + 4, ent.z + 4, cam);
+    if (eye.visible) {
+      ctx.beginPath();
+      ctx.arc(eye.x, eye.y, 2.5, 0, Math.PI * 2);
+      ctx.fillStyle = '#fff';
+      ctx.fill();
+    }
   }
 }
 
-function drawPlayer(time) {
-  const p = game.player;
-  const pts = sineBlob(p.x, p.y, p.amp, p.freq, p.phase, time, 32);
-  ctx.beginPath();
-  ctx.moveTo(pts[0].x, pts[0].y);
-  for (let i = 1; i < pts.length; i++) ctx.lineTo(pts[i].x, pts[i].y);
-  ctx.closePath();
-  ctx.strokeStyle = p.color;
-  ctx.lineWidth = 2.6;
-  ctx.shadowColor = p.color;
-  ctx.shadowBlur = 14;
-  ctx.stroke();
-  ctx.shadowBlur = 0;
-
+function drawPlayer(p, time) {
+  const pts = sineBlob3D(p.x, p.y, p.z, p.amp, p.freq, p.phase, time, 30);
+  strokeProjectedPath(pts, p.color, 2.6, 14);
   // eye
-  ctx.beginPath();
-  ctx.arc(p.x + 6, p.y - 4, 2.5, 0, Math.PI * 2);
-  ctx.fillStyle = '#fff';
-  ctx.fill();
+  const eye = project(p.x + 6, p.y + 5, p.z + 5, game.camera);
+  if (eye.visible) {
+    ctx.beginPath();
+    ctx.arc(eye.x, eye.y, 2.8, 0, Math.PI * 2);
+    ctx.fillStyle = '#fff';
+    ctx.fill();
+  }
+  // label
+  const lab = project(p.x, p.y + p.amp + 12, p.z, game.camera);
+  if (lab.visible) {
+    ctx.font = 'bold 11px system-ui';
+    ctx.fillStyle = p.color;
+    ctx.textAlign = 'center';
+    ctx.fillText(p.id.toUpperCase(), lab.x, lab.y);
+    ctx.textAlign = 'left';
+  }
 }
 
 function drawText(msg, time) {
@@ -378,34 +562,38 @@ function drawText(msg, time) {
   ctx.font = `bold ${msg.size}px system-ui`;
   ctx.fillStyle = msg.color;
   ctx.shadowColor = msg.color;
-  ctx.shadowBlur = 7;
+  ctx.shadowBlur = 6;
   let x = msg.x;
   msg.text.split('').forEach((ch, i) => {
-	const bounce = Math.sin(time * 2.8 + i * 0.55) * 2.8;
-	ctx.fillText(ch, x, msg.y + bounce);
-	x += ctx.measureText(ch).width + 1.2;
+    const bounce = Math.sin(time * 2.6 + i * 0.5) * 2.2;
+    ctx.fillText(ch, x, msg.y + bounce);
+    x += ctx.measureText(ch).width + 1;
   });
   ctx.restore();
 }
 
-function drawBackground(time) {
-  for (let L = 0; L < game.bgLayers; L++) {
-	const speed = game.bgSpeed * (0.25 + L * 0.35);
-	const amp = 7 + L * 5;
-	const yBase = H * 0.58 + L * 28;
-	ctx.beginPath();
-	ctx.moveTo(0, H);
-	for (let x = 0; x <= W; x += 5) {
-	  const y = yBase
-		+ Math.sin(x * 0.009 + time * speed + L) * amp
-		+ Math.sin(x * 0.022 + time * speed * 1.6) * amp * 0.35;
-	  ctx.lineTo(x, y);
-	}
-	ctx.lineTo(W, H);
-	ctx.closePath();
-	ctx.fillStyle = `hsla(${195 + L * 18}, 65%, ${11 + L * 3.5}%, 0.55)`;
-	ctx.fill();
+function drawScope() {
+  ctx.strokeStyle = '#22d3ee';
+  ctx.lineWidth = 1.5;
+  ctx.beginPath();
+  for (let x = 0; x < W; x++) {
+    const y = H / 2
+      + Math.sin(x * 0.025 + t * 2.5) * 50
+      + Math.sin(x * 0.055 + t * 4) * 24
+      + Math.sin(x * 0.1 + t * 1.8) * 12;
+    if (x === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
   }
+  ctx.stroke();
+  // second player harmonic
+  ctx.strokeStyle = '#f472b6';
+  ctx.beginPath();
+  for (let x = 0; x < W; x++) {
+    const y = H / 2
+      + Math.sin(x * 0.03 + t * 2.2 + 1) * 40
+      + Math.sin(x * 0.07 + t * 3.5) * 18;
+    if (x === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+  }
+  ctx.stroke();
 }
 
 function draw() {
@@ -413,71 +601,99 @@ function draw() {
   ctx.fillRect(0, 0, W, H);
 
   if (mode === 'scope') {
-	ctx.strokeStyle = '#22d3ee';
-	ctx.lineWidth = 1.6;
-	ctx.beginPath();
-	for (let x = 0; x < W; x++) {
-	  const y = H/2
-		+ Math.sin(x * 0.028 + t * 2.8) * 48
-		+ Math.sin(x * 0.061 + t * 4.2) * 22
-		+ Math.sin(x * 0.11 + t * 1.9) * 11;
-	  if (x === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
-	}
-	ctx.stroke();
-	return;
+    drawScope();
+    document.getElementById('hudMode').textContent = 'Mode: Scope';
+    return;
   }
 
   drawBackground(t);
-  game.entities.forEach(e => drawEntity(e, t));
-  drawPlayer(t);
+
+  // depth-sort entities + players for crude painter
+  const drawList = [];
+  game.entities.forEach(e => {
+    if (e.collected) return;
+    const pr = project(e.x, e.y, e.z, game.camera);
+    drawList.push({ depth: pr.depth, kind: 'entity', ref: e });
+  });
+  game.players.forEach(p => {
+    const pr = project(p.x, p.y, p.z, game.camera);
+    drawList.push({ depth: pr.depth, kind: 'player', ref: p });
+  });
+  drawList.sort((a, b) => b.depth - a.depth);
+
+  drawList.forEach(item => {
+    if (item.kind === 'entity') drawEntity(item.ref, t);
+    else drawPlayer(item.ref, t);
+  });
+
   game.messages.forEach(m => drawText(m, t));
 
-  // ground
-  ctx.beginPath();
-  ctx.moveTo(0, H - 18);
-  for (let x = 0; x <= W; x += 4) {
-	ctx.lineTo(x, H - 18 + Math.sin(x * 0.035 + t * 1.3) * 3.5);
-  }
-  ctx.strokeStyle = '#334155';
-  ctx.lineWidth = 2.5;
-  ctx.stroke();
-
-  document.getElementById('hud').textContent = `Score: ${score}`;
+  document.getElementById('score1').textContent = scores.p1;
+  document.getElementById('score2').textContent = scores.p2;
+  document.getElementById('hudMode').textContent = `Mode: ${mode === 'wire' ? 'Wire 3D' : 'Play 3D'}`;
+  document.getElementById('hudCam').textContent = `Cam rotY ${Math.round(game.camera.rotY)}°`;
 }
 
-// ---------- Physics & Gameplay ----------
+// ---------- Physics ----------
 function update(dt) {
-  const p = game.player;
-  const speed = 140;
+  game.players.forEach(p => {
+    const c = p.controls;
+    const sp = p.speed;
 
-  if (keys['ArrowLeft'] || keys['KeyA']) p.vx = -speed;
-  else if (keys['ArrowRight'] || keys['KeyD']) p.vx = speed;
-  else p.vx *= 0.82;
+    // horizontal plane relative to camera yaw so "forward" feels natural
+    const yaw = deg2rad(game.camera.rotY);
+    let mx = 0, mz = 0;
+    if (keys[c.left])  { mx -= Math.cos(yaw); mz -= Math.sin(yaw); }
+    if (keys[c.right]) { mx += Math.cos(yaw); mz += Math.sin(yaw); }
+    if (keys[c.forward]) { mx += Math.sin(yaw); mz -= Math.cos(yaw); }
+    if (keys[c.back])    { mx -= Math.sin(yaw); mz += Math.cos(yaw); }
 
-  if (keys['Space'] || keys['ArrowUp'] || keys['KeyW']) {
-	p.vy = -p.flap * 18;
-  }
+    const len = Math.hypot(mx, mz) || 1;
+    p.vx = (mx / len) * sp * (keys[c.left] || keys[c.right] || keys[c.forward] || keys[c.back] ? 1 : 0);
+    p.vz = (mz / len) * sp * (keys[c.left] || keys[c.right] || keys[c.forward] || keys[c.back] ? 1 : 0);
 
-  p.vy += 520 * dt;               // gravity
-  p.x += p.vx * dt;
-  p.y += p.vy * dt;
+    if (!(keys[c.left] || keys[c.right] || keys[c.forward] || keys[c.back])) {
+      p.vx *= 0.85;
+      p.vz *= 0.85;
+    }
 
-  // soft bounds
-  if (p.x < 30) p.x = 30;
-  if (p.x > W - 30) p.x = W - 30;
-  if (p.y > H - 40) { p.y = H - 40; p.vy *= -0.35; }
-  if (p.y < 30) { p.y = 30; p.vy = 0; }
+    if (keys[c.up]) p.vy = -p.flap * 16;
 
-  // collect
+    // gravity
+    p.vy += 480 * dt * p.mass;
+    p.x += p.vx * dt;
+    p.y += p.vy * dt;
+    p.z += p.vz * dt;
+
+    // soft floor
+    if (p.y < 8) { p.y = 8; p.vy *= -0.3; }
+    // bounds
+    p.x = Math.max(-160, Math.min(160, p.x));
+    p.z = Math.max(-120, Math.min(120, p.z));
+    if (p.y > 200) { p.y = 200; p.vy = 0; }
+
+    // action = small pulse / beep
+    if (keys[c.action]) {
+      // one-shot style: only while held we raise amp briefly
+      p.amp = Math.min(22, p.amp + 0.15);
+    } else {
+      p.amp += (14 - p.amp) * 0.05;
+    }
+  });
+
+  // collectibles
   game.entities.forEach(e => {
-	if (e.type === 'collect' && !e.collected) {
-	  const dx = p.x - e.x, dy = p.y - e.y;
-	  if (dx*dx + dy*dy < (p.amp + e.amp) * (p.amp + e.amp) * 0.55) {
-		e.collected = true;
-		score += 10;
-		beep(880, 0.08);
-	  }
-	}
+    if (e.type !== 'collect' || e.collected) return;
+    game.players.forEach(p => {
+      const dx = p.x - e.x, dy = p.y - e.y, dz = p.z - e.z;
+      const r = (p.amp + e.amp) * 0.7;
+      if (dx*dx + dy*dy + dz*dz < r * r) {
+        e.collected = true;
+        if (p.id === 'p1' || p.id === 'player1') scores.p1 += 10;
+        else scores.p2 += 10;
+        beep(820 + (p.id === 'p2' ? 120 : 0), 0.07);
+      }
+    });
   });
 }
 
@@ -485,63 +701,57 @@ function update(dt) {
 function ensureAudio() {
   if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
 }
-
 function startMusic() {
   ensureAudio();
   stopMusic();
   const base = game.music.base;
   const harm = game.music.harmonics;
   const tempo = game.music.tempo;
-
   for (let h = 1; h <= harm; h++) {
-	const osc = audioCtx.createOscillator();
-	const gain = audioCtx.createGain();
-	osc.type = 'sine';
-	osc.frequency.value = base * h * (h % 2 ? 1 : 1.005);
-	gain.gain.value = 0.07 / h;
-	osc.connect(gain);
-	gain.connect(audioCtx.destination);
-	osc.start();
-
-	const lfo = audioCtx.createOscillator();
-	const lfoG = audioCtx.createGain();
-	lfo.frequency.value = 0.12 * tempo * (h * 0.7);
-	lfoG.gain.value = 0.025 / h;
-	lfo.connect(lfoG);
-	lfoG.connect(gain.gain);
-	lfo.start();
-
-	musicNodes.push(osc, gain, lfo, lfoG);
+    const osc = audioCtx.createOscillator();
+    const gain = audioCtx.createGain();
+    osc.type = 'sine';
+    osc.frequency.value = base * h * (h % 2 ? 1 : 1.004);
+    gain.gain.value = 0.065 / h;
+    osc.connect(gain);
+    gain.connect(audioCtx.destination);
+    osc.start();
+    const lfo = audioCtx.createOscillator();
+    const lfoG = audioCtx.createGain();
+    lfo.frequency.value = 0.11 * tempo * (h * 0.65);
+    lfoG.gain.value = 0.022 / h;
+    lfo.connect(lfoG);
+    lfoG.connect(gain.gain);
+    lfo.start();
+    musicNodes.push(osc, gain, lfo, lfoG);
   }
+  setStatus('Music on');
 }
-
 function stopMusic() {
-  musicNodes.forEach(n => { try { n.stop(); } catch(e){} });
+  musicNodes.forEach(n => { try { n.stop(); } catch (e) {} });
   musicNodes = [];
 }
-
 function beep(freq, dur) {
   ensureAudio();
   const o = audioCtx.createOscillator();
   const g = audioCtx.createGain();
   o.type = 'sine';
   o.frequency.value = freq;
-  g.gain.value = 0.15;
+  g.gain.value = 0.14;
   o.connect(g); g.connect(audioCtx.destination);
   o.start();
   g.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + dur);
   o.stop(audioCtx.currentTime + dur + 0.02);
 }
 
-// ---------- Main Loop ----------
+// ---------- Loop ----------
 let last = 0;
 function loop(now) {
   if (!running) return;
-  const dt = Math.min(0.032, (now - last) / 1000 || 0.016);
+  const dt = Math.min(0.033, (now - last) / 1000 || 0.016);
   last = now;
   t = now * 0.001;
-
-  if (mode === 'play') update(dt);
+  if (mode === 'play' || mode === 'wire') update(dt);
   draw();
   animId = requestAnimationFrame(loop);
 }
@@ -550,39 +760,22 @@ function togglePlay() {
   running = !running;
   const btn = document.getElementById('playBtn');
   if (running) {
-	btn.textContent = '■ Stop';
-	ensureAudio();
-	if (audioCtx.state === 'suspended') audioCtx.resume();
-	startMusic();
-	last = performance.now();
-	animId = requestAnimationFrame(loop);
-	setStatus('Playing — arrows / WASD + Space');
+    btn.textContent = '⏸ Pause';
+    last = performance.now();
+    ensureAudio();
+    animId = requestAnimationFrame(loop);
+    setStatus('Playing');
   } else {
-	btn.textContent = '▶ Play';
-	stopMusic();
-	cancelAnimationFrame(animId);
-	setStatus('Stopped');
+    btn.textContent = '▶ Play';
+    if (animId) cancelAnimationFrame(animId);
+    setStatus('Paused');
   }
-}
-
-function updateLive() {
-  game.player.amp = +document.getElementById('pAmp').value;
-  game.player.freq = +document.getElementById('pFreq').value;
-  game.music.base = +document.getElementById('mBase').value;
-  if (running) { stopMusic(); startMusic(); }
-  draw();
-}
-
-function syncSliders() {
-  document.getElementById('pAmp').value = game.player.amp;
-  document.getElementById('pFreq').value = game.player.freq;
-  document.getElementById('mBase').value = game.music.base;
 }
 
 function setMode(m) {
   mode = m;
-  document.querySelectorAll('.tab').forEach(t => {
-	t.classList.toggle('active', t.dataset.mode === m);
+  document.querySelectorAll('.tab').forEach(tab => {
+    tab.classList.toggle('active', tab.dataset.mode === m);
   });
   draw();
 }
@@ -599,39 +792,34 @@ async function exportPackage() {
   zip.file('game.xml', document.getElementById('gameXml').value);
 
   ensureAudio();
-  const sr = 44100;
-  const dur = 5;
-  const len = sr * dur;
+  const sr = 44100, dur = 5, len = sr * dur;
   const buf = audioCtx.createBuffer(1, len, sr);
   const data = buf.getChannelData(0);
   const base = game.music.base;
-
   for (let i = 0; i < len; i++) {
-	const tt = i / sr;
-	let s = 0;
-	for (let h = 1; h <= 6; h++) s += Math.sin(2 * Math.PI * base * h * tt) / h;
-	const env = Math.min(1, tt * 3) * Math.min(1, (dur - tt) * 2.5);
-	data[i] = s * 0.18 * env;
+    const tt = i / sr;
+    let s = 0;
+    for (let h = 1; h <= 6; h++) s += Math.sin(2 * Math.PI * base * h * tt) / h;
+    const env = Math.min(1, tt * 3) * Math.min(1, (dur - tt) * 2.5);
+    data[i] = s * 0.18 * env;
   }
-
   function encodeWav(samples, sampleRate) {
-	const buffer = new ArrayBuffer(44 + samples.length * 2);
-	const view = new DataView(buffer);
-	const ws = (o, str) => { for (let i = 0; i < str.length; i++) view.setUint8(o + i, str.charCodeAt(i)); };
-	ws(0, 'RIFF'); view.setUint32(4, 36 + samples.length * 2, true);
-	ws(8, 'WAVE'); ws(12, 'fmt '); view.setUint32(16, 16, true);
-	view.setUint16(20, 1, true); view.setUint16(22, 1, true);
-	view.setUint32(24, sampleRate, true); view.setUint32(28, sampleRate * 2, true);
-	view.setUint16(32, 2, true); view.setUint16(34, 16, true);
-	ws(36, 'data'); view.setUint32(40, samples.length * 2, true);
-	let o = 44;
-	for (let i = 0; i < samples.length; i++, o += 2) {
-	  const s = Math.max(-1, Math.min(1, samples[i]));
-	  view.setInt16(o, s < 0 ? s * 0x8000 : s * 0x7FFF, true);
-	}
-	return new Blob([buffer], { type: 'audio/wav' });
+    const buffer = new ArrayBuffer(44 + samples.length * 2);
+    const view = new DataView(buffer);
+    const ws = (o, str) => { for (let i = 0; i < str.length; i++) view.setUint8(o + i, str.charCodeAt(i)); };
+    ws(0, 'RIFF'); view.setUint32(4, 36 + samples.length * 2, true);
+    ws(8, 'WAVE'); ws(12, 'fmt '); view.setUint32(16, 16, true);
+    view.setUint16(20, 1, true); view.setUint16(22, 1, true);
+    view.setUint32(24, sampleRate, true); view.setUint32(28, sampleRate * 2, true);
+    view.setUint16(32, 2, true); view.setUint16(34, 16, true);
+    ws(36, 'data'); view.setUint32(40, samples.length * 2, true);
+    let o = 44;
+    for (let i = 0; i < samples.length; i++, o += 2) {
+      const s = Math.max(-1, Math.min(1, samples[i]));
+      view.setInt16(o, s < 0 ? s * 0x8000 : s * 0x7FFF, true);
+    }
+    return new Blob([buffer], { type: 'audio/wav' });
   }
-
   zip.file('music/sine_theme.wav', encodeWav(data, sr));
   const content = await zip.generateAsync({ type: 'blob' });
   const a = document.createElement('a');

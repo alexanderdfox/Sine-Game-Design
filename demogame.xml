@@ -1,37 +1,31 @@
 <?xml version="1.0"?>
-<SineGame name="SinePlatformer" width="720" height="400">
-  <!-- Player starts on the left -->
-  <Player x="70" y="280" amp="15" freq="2.0" phase="0" color="#22d3ee" flap="11"/>
+<SineGame name="SineArena3D" width="900" height="520" perspective="1">
+  <Camera x="0" y="40" z="220" lookX="0" lookY="20" lookZ="0" fov="55" rotY="0" rotX="-12"/>
 
-  <!-- Solid platforms (the "ground" pieces) -->
-  <Entity type="platform" id="ground1" x="120" y="340" amp="4" freq="0.3" phase="0" color="#64748b" width="180"/>
-  <Entity type="platform" id="ground2" x="340" y="340" amp="3" freq="0.4" phase="1" color="#64748b" width="160"/>
-  <Entity type="platform" id="ground3" x="560" y="340" amp="4" freq="0.35" phase="2" color="#64748b" width="200"/>
+  <Player id="p1" x="-60" y="30" z="0" amp="14" freq="2.2" phase="0" color="#22d3ee" flap="11" speed="160" mass="1">
+    <Controls left="KeyA" right="KeyD" forward="KeyW" back="KeyS" up="Space" action="KeyE"/>
+  </Player>
 
-  <!-- Floating platforms -->
-  <Entity type="platform" id="float1" x="220" y="260" amp="6" freq="0.8" phase="0" color="#94a3b8" width="100"/>
-  <Entity type="platform" id="float2" x="400" y="200" amp="5" freq="1.1" phase="1.5" color="#94a3b8" width="90"/>
-  <Entity type="platform" id="float3" x="580" y="160" amp="7" freq="0.9" phase="0.7" color="#94a3b8" width="110"/>
-  <Entity type="platform" id="float4" x="300" y="120" amp="5" freq="1.3" phase="2.2" color="#94a3b8" width="80"/>
+  <Player id="p2" x="60" y="30" z="0" amp="14" freq="2.0" phase="1.2" color="#f472b6" flap="11" speed="160" mass="1">
+    <Controls left="ArrowLeft" right="ArrowRight" forward="ArrowUp" back="ArrowDown" up="Enter" action="ShiftRight"/>
+  </Player>
 
-  <!-- Collectible signs (the goal items) -->
-  <Entity type="collect" id="sign1" x="220" y="220" amp="9" freq="3.0" phase="0" color="#4ade80"/>
-  <Entity type="collect" id="sign2" x="400" y="160" amp="9" freq="2.7" phase="1.2" color="#4ade80"/>
-  <Entity type="collect" id="sign3" x="580" y="120" amp="10" freq="3.3" phase="0.5" color="#4ade80"/>
-  <Entity type="collect" id="sign4" x="300" y="80" amp="8" freq="3.6" phase="2.0" color="#4ade80"/>
-  <Entity type="collect" id="sign5" x="480" y="280" amp="9" freq="2.9" phase="1.8" color="#4ade80"/>
+  <Entity type="platform" id="floor" x="0" y="0" z="0" amp="3" freq="0.25" phase="0" color="#64748b" width="280" depth="180"/>
+  <Entity type="platform" id="padL" x="-90" y="45" z="-40" amp="5" freq="0.7" phase="0" color="#94a3b8" width="70" depth="50"/>
+  <Entity type="platform" id="padR" x="90" y="45" z="-40" amp="5" freq="0.8" phase="1" color="#94a3b8" width="70" depth="50"/>
+  <Entity type="platform" id="padC" x="0" y="80" z="-70" amp="6" freq="1.0" phase="0.5" color="#94a3b8" width="90" depth="55"/>
 
-  <!-- Friendly NPC -->
-  <Entity type="npc" id="guide" x="480" y="290" amp="13" freq="1.4" phase="0.8" color="#f472b6"/>
+  <Entity type="collect" id="c1" x="-90" y="70" z="-40" amp="9" freq="3.0" phase="0" color="#4ade80"/>
+  <Entity type="collect" id="c2" x="90" y="70" z="-40" amp="9" freq="2.8" phase="1" color="#4ade80"/>
+  <Entity type="collect" id="c3" x="0" y="105" z="-70" amp="10" freq="3.2" phase="0.6" color="#4ade80"/>
+  <Entity type="collect" id="c4" x="0" y="35" z="50" amp="8" freq="2.5" phase="2" color="#4ade80"/>
 
-  <!-- Ambient particles -->
-  <Entity type="particle" id="sparkles" x="360" y="180" amp="55" freq="0.35" phase="0" color="#38bdf8" count="22"/>
+  <Entity type="npc" id="guide" x="0" y="35" z="-20" amp="12" freq="1.3" phase="0.4" color="#fbbf24"/>
+  <Entity type="particle" id="sparks" x="0" y="60" z="0" amp="50" freq="0.4" phase="0" color="#38bdf8" count="24"/>
 
-  <!-- UI text -->
-  <Message text="SINE PLATFORMER" x="210" y="32" size="24" color="#e2e8f0"/>
-  <Message text="Collect all glowing signs" x="230" y="58" size="14" color="#94a3b8"/>
+  <Message text="SINE ARENA 3D" x="320" y="28" size="22" color="#e2e8f0"/>
+  <Message text="P1 WASD+Space · P2 Arrows+Enter · collect green orbs" x="250" y="52" size="12" color="#94a3b8"/>
 
-  <!-- Background + Music -->
-  <Background layers="4" speed="0.28"/>
-  <Music base="87" harmonics="5" tempo="0.95"/>
+  <Background layers="3" speed="0.22"/>
+  <Music base="92" harmonics="5" tempo="1.0"/>
 </SineGame>
