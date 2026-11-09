@@ -35,13 +35,36 @@ canvas { background: #000; border-radius: 8px; width: 100%; display: block; bord
 .tab.active { background: var(--accent); color: #020617; font-weight: 700; }
 .hud { position: absolute; top: 12px; left: 14px; font-family: ui-monospace, monospace; font-size: .8rem; color: #e2e8f0; text-shadow: 0 0 6px #000; pointer-events: none; }
 .canvas-wrap { position: relative; }
+
+.sine-nav {
+  display: flex; flex-wrap: wrap; gap: 0.4rem; margin-bottom: 0.9rem;
+  padding: 0.5rem 0.65rem; background: #0f172a; border: 1px solid #1e293b;
+  border-radius: 8px; font-size: 0.78rem;
+}
+.sine-nav a {
+  color: #94a3b8; text-decoration: none; padding: 0.28rem 0.65rem;
+  border-radius: 5px; transition: all 0.15s;
+}
+.sine-nav a:hover { color: #38bdf8; background: rgba(56,189,248,0.1); }
+.sine-nav a.active { color: #22d3ee; background: rgba(34,211,238,0.12); font-weight: 600; }
+.sine-nav .sep { color: #334155; padding: 0 0.2rem; }
+
 </style>
 </head>
 <body>
 <div class="container">
+    <nav class="sine-nav">
+    <a href="index.html">Hub</a>
+    <span class="sep">·</span>
+    <a href="studio.html">Studio</a>
+    <a href="vector.html">Vector</a>
+    <a href="matrix.html">Matrix</a>
+    <a href="gamestudio.html" class="active">Game Studio</a>
+  </nav>
+
   <header>
 	<h1>Sine Game Studio</h1>
-	<p>Full pure-sine engine — graphics, sound, motion, fonts, levels, particles. XML + generated audio. No external assets.</p>
+	<p>Full pure-sine engine — graphics, sound, motion, levels, particles. Author in XML, export ZIP packages. Works alongside Studio / Vector / Matrix.</p>
   </header>
 
   <div class="grid">
@@ -108,22 +131,45 @@ let keys = {};
 
 // ---------- Default Demo Level ----------
 const demoXml = `<?xml version="1.0"?>
-<SineGame name="CrowSign" width="720" height="400">
-  <Player x="90" y="200" amp="16" freq="2.1" phase="0" color="#22d3ee" flap="9"/>
-  <Entity type="npc" id="owl" x="520" y="150" amp="14" freq="1.3" phase="1.1" color="#f472b6"/>
-  <Entity type="platform" id="p1" x="280" y="300" amp="8" freq="0.6" phase="0" color="#64748b" width="110"/>
-  <Entity type="platform" id="p2" x="480" y="250" amp="6" freq="0.9" phase="2" color="#64748b" width="90"/>
-  <Entity type="collect" id="c1" x="320" y="180" amp="9" freq="3.2" phase="0" color="#4ade80"/>
-  <Entity type="collect" id="c2" x="560" y="120" amp="9" freq="2.8" phase="1.5" color="#4ade80"/>
-  <Entity type="collect" id="c3" x="180" y="110" amp="8" freq="3.5" phase="0.7" color="#4ade80"/>
-  <Entity type="particle" id="dust" x="360" y="200" amp="40" freq="0.4" phase="0" color="#38bdf8" count="18"/>
-  <Message text="COLLECT THE SIGNS" x="200" y="36" size="26" color="#e2e8f0"/>
-  <Background layers="4" speed="0.35"/>
-  <Music base="98" harmonics="5" tempo="1.05"/>
+<SineGame name="SinePlatformer" width="720" height="400">
+  <!-- Player starts on the left -->
+  <Player x="70" y="280" amp="15" freq="2.0" phase="0" color="#22d3ee" flap="11"/>
+
+  <!-- Solid platforms (the "ground" pieces) -->
+  <Entity type="platform" id="ground1" x="120" y="340" amp="4" freq="0.3" phase="0" color="#64748b" width="180"/>
+  <Entity type="platform" id="ground2" x="340" y="340" amp="3" freq="0.4" phase="1" color="#64748b" width="160"/>
+  <Entity type="platform" id="ground3" x="560" y="340" amp="4" freq="0.35" phase="2" color="#64748b" width="200"/>
+
+  <!-- Floating platforms -->
+  <Entity type="platform" id="float1" x="220" y="260" amp="6" freq="0.8" phase="0" color="#94a3b8" width="100"/>
+  <Entity type="platform" id="float2" x="400" y="200" amp="5" freq="1.1" phase="1.5" color="#94a3b8" width="90"/>
+  <Entity type="platform" id="float3" x="580" y="160" amp="7" freq="0.9" phase="0.7" color="#94a3b8" width="110"/>
+  <Entity type="platform" id="float4" x="300" y="120" amp="5" freq="1.3" phase="2.2" color="#94a3b8" width="80"/>
+
+  <!-- Collectible signs (the goal items) -->
+  <Entity type="collect" id="sign1" x="220" y="220" amp="9" freq="3.0" phase="0" color="#4ade80"/>
+  <Entity type="collect" id="sign2" x="400" y="160" amp="9" freq="2.7" phase="1.2" color="#4ade80"/>
+  <Entity type="collect" id="sign3" x="580" y="120" amp="10" freq="3.3" phase="0.5" color="#4ade80"/>
+  <Entity type="collect" id="sign4" x="300" y="80" amp="8" freq="3.6" phase="2.0" color="#4ade80"/>
+  <Entity type="collect" id="sign5" x="480" y="280" amp="9" freq="2.9" phase="1.8" color="#4ade80"/>
+
+  <!-- Friendly NPC -->
+  <Entity type="npc" id="guide" x="480" y="290" amp="13" freq="1.4" phase="0.8" color="#f472b6"/>
+
+  <!-- Ambient particles -->
+  <Entity type="particle" id="sparkles" x="360" y="180" amp="55" freq="0.35" phase="0" color="#38bdf8" count="22"/>
+
+  <!-- UI text -->
+  <Message text="SINE PLATFORMER" x="210" y="32" size="24" color="#e2e8f0"/>
+  <Message text="Collect all glowing signs" x="230" y="58" size="14" color="#94a3b8"/>
+
+  <!-- Background + Music -->
+  <Background layers="4" speed="0.28"/>
+  <Music base="87" harmonics="5" tempo="0.95"/>
 </SineGame>`;
 
 let game = {
-  name: 'CrowSign',
+  name: 'SinePlatformer',
   player: { x: 90, y: 200, vx: 0, vy: 0, amp: 16, freq: 2.1, phase: 0, color: '#22d3ee', flap: 9 },
   entities: [],
   messages: [],

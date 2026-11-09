@@ -14,6 +14,7 @@
             --accent-secondary: #4facfe;
             --text-main: #f1f5f9;
             --text-muted: #94a3b8;
+            --green: #22c55e;
         }
 
         * {
@@ -34,7 +35,6 @@
             position: relative;
         }
 
-        /* Background Sine Wave Grid Effect */
         body::before {
             content: '';
             position: absolute;
@@ -49,7 +49,7 @@
 
         header {
             text-align: center;
-            padding: 4rem 1rem 2rem 1rem;
+            padding: 3.5rem 1rem 1.5rem 1rem;
         }
 
         .badge {
@@ -66,7 +66,7 @@
         }
 
         h1 {
-            font-size: 3rem;
+            font-size: 2.8rem;
             font-weight: 800;
             letter-spacing: -0.02em;
             margin-bottom: 0.5rem;
@@ -77,26 +77,39 @@
 
         p.subtitle {
             color: var(--text-muted);
-            font-size: 1.1rem;
-            max-width: 600px;
+            font-size: 1.05rem;
+            max-width: 640px;
             margin: 0 auto;
             line-height: 1.6;
         }
 
+        .pipeline {
+            max-width: 900px;
+            margin: 0 auto 2rem auto;
+            padding: 1rem 1.25rem;
+            background: rgba(34, 197, 94, 0.06);
+            border: 1px solid rgba(34, 197, 94, 0.25);
+            border-radius: 12px;
+            font-size: 0.9rem;
+            color: var(--text-muted);
+            line-height: 1.55;
+        }
+        .pipeline strong { color: var(--green); }
+
         main {
             max-width: 1100px;
-            width: 90%;
-            margin: 0 auto 4rem auto;
+            width: 92%;
+            margin: 0 auto 3rem auto;
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 1.5rem;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 1.35rem;
         }
 
         .card {
             background: var(--card-bg);
             border: 1px solid var(--card-border);
             border-radius: 16px;
-            padding: 2.5rem 2rem;
+            padding: 2rem 1.6rem;
             text-decoration: none;
             color: inherit;
             transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
@@ -105,6 +118,7 @@
             flex-direction: column;
             justify-content: space-between;
             backdrop-filter: blur(10px);
+            min-height: 180px;
         }
 
         .card:hover {
@@ -115,9 +129,9 @@
         }
 
         .card h2 {
-            font-size: 1.5rem;
+            font-size: 1.35rem;
             font-weight: 600;
-            margin-bottom: 0.75rem;
+            margin-bottom: 0.6rem;
             display: flex;
             align-items: center;
             justify-content: space-between;
@@ -125,25 +139,26 @@
 
         .card h2 span {
             font-family: 'Fira Code', monospace;
-            font-size: 1rem;
+            font-size: 0.9rem;
             color: var(--accent-primary);
-            opacity: 0.8;
+            opacity: 0.85;
         }
 
         .card p {
             color: var(--text-muted);
-            font-size: 0.95rem;
+            font-size: 0.92rem;
             line-height: 1.5;
-            margin-bottom: 1.5rem;
+            margin-bottom: 1.2rem;
+            flex: 1;
         }
 
         .card-link {
             font-weight: 600;
-            font-size: 0.9rem;
+            font-size: 0.88rem;
             color: var(--accent-primary);
             display: inline-flex;
             align-items: center;
-            gap: 0.5rrem;
+            gap: 0.4rem;
         }
 
         .card-link::after {
@@ -155,9 +170,20 @@
             transform: translateX(4px);
         }
 
+        .tag {
+            display: inline-block;
+            font-size: 0.7rem;
+            font-family: 'Fira Code', monospace;
+            padding: 0.15rem 0.45rem;
+            border-radius: 4px;
+            margin-bottom: 0.5rem;
+            background: rgba(0, 242, 254, 0.12);
+            color: var(--accent-primary);
+        }
+
         footer {
             text-align: center;
-            padding: 2rem;
+            padding: 1.75rem;
             color: var(--text-muted);
             font-size: 0.85rem;
             border-top: 1px solid var(--card-border);
@@ -170,8 +196,8 @@
         }
 
         @media (max-width: 768px) {
-            h1 { font-size: 2.3rem; }
-            header { padding: 2.5rem 1rem 1.5rem 1rem; }
+            h1 { font-size: 2.1rem; }
+            header { padding: 2.2rem 1rem 1.2rem 1rem; }
         }
     </style>
 </head>
@@ -179,41 +205,59 @@
 
     <header>
         <div class="badge">alexanderdfox / sine-game-design</div>
-        <h1>Game Design Hub</h1>
-        <p class="subtitle">Welcome to the core navigation portal. Select a module below to access the development environment, grid matrices, or mathematical vector systems.</p>
+        <h1>Sine Game Design Hub</h1>
+        <p class="subtitle">Unified vector · sine · audio pipeline. Create geometry, sequence sound, play assets, and ship pure-sine games that all speak the same ZIP + XML language.</p>
     </header>
 
+    <div class="pipeline">
+        <strong>How the pieces work together</strong><br>
+        <strong>Studio</strong> → exports frame / combinatorial <code>.zip</code> (manifest XML + .ogg)<br>
+        <strong>Vector</strong> → loads those ZIPs, scrubs frames, visualizes waveform<br>
+        <strong>Matrix</strong> → drops the same ZIPs onto puzzle tiles for sequenced playback<br>
+        <strong>Game Studio</strong> → authors pure-sine levels as XML, exports playable packages<br>
+        Shared format keeps everything interoperable end-to-end.
+    </div>
+
     <main>
-        <!-- Studio Card -->
         <a href="studio.html" class="card">
             <div>
+                <span class="tag">CREATE</span>
                 <h2>Studio <span>[01]</span></h2>
-                <p>The core development environment, workspaces, tooling configuration, and live project builds.</p>
+                <p>OpenSCAD-style points → live 3D/2D vector preview → single-frame or bulk combinatorial ZIP export (audio + XML manifest).</p>
             </div>
             <div class="card-link">Open Studio</div>
         </a>
 
-        <!-- Matrix Card -->
+        <a href="vector.html" class="card">
+            <div>
+                <span class="tag">INSPECT</span>
+                <h2>Vector Player <span>[02]</span></h2>
+                <p>Import any Studio ZIP, list files, scrub frames, and watch the phosphor-style oscilloscope + geometry play back together.</p>
+            </div>
+            <div class="card-link">Launch Player</div>
+        </a>
+
         <a href="matrix.html" class="card">
             <div>
-                <h2>Matrix <span>[02]</span></h2>
-                <p>Grid-based spatial systems, map layout matrices, data states, and structural logic algorithms.</p>
+                <span class="tag">SEQUENCE</span>
+                <h2>Matrix <span>[03]</span></h2>
+                <p>4×4 sliding puzzle that loads Studio ZIPs onto tiles. Slide to rearrange and trigger sequenced vector art + audio.</p>
             </div>
             <div class="card-link">Explore Matrix</div>
         </a>
 
-        <!-- Vector Card -->
-        <a href="vector.html" class="card">
+        <a href="gamestudio.html" class="card">
             <div>
-                <h2>Vector <span>[03]</span></h2>
-                <p>Mathematical calculations, physics kinematics, motion vectors, and wave trajectory systems.</p>
+                <span class="tag">PLAY / AUTHOR</span>
+                <h2>Game Studio <span>[04]</span></h2>
+                <p>Full pure-sine engine: player, platforms, collectibles, particles, music — all driven by editable XML. Export complete game packages.</p>
             </div>
-            <div class="card-link">Launch Vector</div>
+            <div class="card-link">Open Game Studio</div>
         </a>
     </main>
 
     <footer>
-        <p>Powered by Sine Game Design &bull; View source on <a href="https://github.com/alexanderdfox" target="_blank">GitHub</a></p>
+        <p>Sine Game Design · vector art + sound · 2D &amp; 3D · <a href="https://github.com/alexanderdfox/Sine-Game-Design" target="_blank">GitHub</a></p>
     </footer>
 
 </body>

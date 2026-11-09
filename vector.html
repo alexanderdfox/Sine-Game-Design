@@ -46,13 +46,36 @@
         .full-width { grid-column: 1 / -1; }
         .status { font-size: 0.8rem; color: var(--cyan); font-style: italic; }
         .metadata-box { font-family: monospace; font-size: 0.75rem; background: var(--bg-color); padding: 0.75rem; border-radius: 0.4rem; border: 1px solid var(--border); color: var(--text-muted); max-height: 120px; overflow-y: auto; }
+    
+        .sine-nav {
+            display: flex; flex-wrap: wrap; gap: 0.4rem; margin-bottom: 1rem;
+            padding: 0.5rem 0.65rem; background: #0f172a; border: 1px solid #1e293b;
+            border-radius: 8px; font-size: 0.78rem;
+        }
+        .sine-nav a {
+            color: #94a3b8; text-decoration: none; padding: 0.28rem 0.65rem;
+            border-radius: 5px; transition: all 0.15s;
+        }
+        .sine-nav a:hover { color: #38bdf8; background: rgba(56,189,248,0.1); }
+        .sine-nav a.active { color: #22d3ee; background: rgba(34,211,238,0.12); font-weight: 600; }
+        .sine-nav .sep { color: #334155; padding: 0 0.2rem; }
+
     </style>
 </head>
 <body>
     <div class="container">
+                <nav class="sine-nav">
+            <a href="index.html">Hub</a>
+            <span class="sep">·</span>
+            <a href="studio.html">Studio</a>
+            <a href="vector.html" class="active">Vector</a>
+            <a href="matrix.html">Matrix</a>
+            <a href="gamestudio.html">Game Studio</a>
+        </nav>
+
         <header>
             <h1>Vector Game Engine Asset Player</h1>
-            <p>Drop your exported engine `.zip` package to inspect files, scrub frames, and visualize live OGG/sine wave oscilloscope waveforms.</p>
+            <p>Load any Studio-exported `.zip` (manifest + .ogg). Inspect paths, scrub frames, and visualize geometry + phosphor waveform.</p>
         </header>
 
         <div class="grid">

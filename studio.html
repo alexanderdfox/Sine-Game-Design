@@ -51,10 +51,33 @@
         .full-width { grid-column: 1 / -1; }
         .actions { display: flex; gap: 1rem; flex-wrap: wrap; }
         .status { font-size: 0.8rem; color: var(--cyan); font-style: italic; }
+    
+        .sine-nav {
+            display: flex; flex-wrap: wrap; gap: 0.4rem; margin-bottom: 1rem;
+            padding: 0.5rem 0.65rem; background: #0f172a; border: 1px solid #1e293b;
+            border-radius: 8px; font-size: 0.78rem;
+        }
+        .sine-nav a {
+            color: #94a3b8; text-decoration: none; padding: 0.28rem 0.65rem;
+            border-radius: 5px; transition: all 0.15s;
+        }
+        .sine-nav a:hover { color: #38bdf8; background: rgba(56,189,248,0.1); }
+        .sine-nav a.active { color: #22d3ee; background: rgba(34,211,238,0.12); font-weight: 600; }
+        .sine-nav .sep { color: #334155; padding: 0 0.2rem; }
+
     </style>
 </head>
 <body>
     <div class="container">
+                <nav class="sine-nav">
+            <a href="index.html">Hub</a>
+            <span class="sep">·</span>
+            <a href="studio.html" class="active">Studio</a>
+            <a href="vector.html">Vector</a>
+            <a href="matrix.html">Matrix</a>
+            <a href="gamestudio.html">Game Studio</a>
+        </nav>
+
         <header>
             <h1>3D & 2D Vector Game Engine Studio</h1>
             <p>Manually pre-rotate geometry, preview live, and export individual frames or batch combinatorial assets as ZIP packages.</p>
@@ -429,7 +452,7 @@
             a.download = `vector_frame_${rx}_${ry}_${rz}.zip`;
             a.click();
             URL.revokeObjectURL(url);
-            setStatus("Current frame ZIP package (.ogg + XML) exported successfully!");
+            setStatus("Current frame ZIP ready — drop into Vector or Matrix tiles.");
         }
 
         // --- BATCH EXPORT ZIP ---
@@ -513,7 +536,7 @@
                 a.click();
                 URL.revokeObjectURL(url);
 
-                setStatus(`Successfully exported ZIP package with ${count} assets!`);
+                setStatus(`Bulk ZIP ready (${count} assets) — load in Vector or Matrix.`);
             } catch (err) {
                 console.error(err);
                 setStatus("Error generating ZIP package.");

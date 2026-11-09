@@ -60,13 +60,36 @@
         .canvas-label { position: absolute; top: 0.75rem; left: 0.75rem; font-family: monospace; font-size: 0.7rem; pointer-events: none; color: var(--accent); text-shadow: 0 0 5px var(--accent-glow); }
 
         .status { font-size: 0.8rem; color: var(--cyan); font-style: italic; }
+    
+        .sine-nav {
+            display: flex; flex-wrap: wrap; gap: 0.4rem; margin-bottom: 1rem;
+            padding: 0.5rem 0.65rem; background: #0f172a; border: 1px solid #1e293b;
+            border-radius: 8px; font-size: 0.78rem;
+        }
+        .sine-nav a {
+            color: #94a3b8; text-decoration: none; padding: 0.28rem 0.65rem;
+            border-radius: 5px; transition: all 0.15s;
+        }
+        .sine-nav a:hover { color: #38bdf8; background: rgba(56,189,248,0.1); }
+        .sine-nav a.active { color: #22d3ee; background: rgba(34,211,238,0.12); font-weight: 600; }
+        .sine-nav .sep { color: #334155; padding: 0 0.2rem; }
+
     </style>
 </head>
 <body>
     <div class="container">
+                <nav class="sine-nav">
+            <a href="index.html">Hub</a>
+            <span class="sep">·</span>
+            <a href="studio.html">Studio</a>
+            <a href="vector.html">Vector</a>
+            <a href="matrix.html" class="active">Matrix</a>
+            <a href="gamestudio.html">Game Studio</a>
+        </nav>
+
         <header>
             <h1>Modular Vector Puzzle & Sound Sequencer Studio</h1>
-            <p>Upload a `.zip` package to any puzzle tile to load its vector art and `.ogg` audio. Slide tiles to sequence audio and customize art colors!</p>
+            <p>Drop Studio-exported `.zip` packages onto tiles (same format Vector uses). Slide to sequence vector art + audio; recolor freely.</p>
         </header>
 
         <div class="grid-layout">
