@@ -1,0 +1,436 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Modular Vector Puzzle & Sound Sequencer Studio</title>
+    <!-- Include JSZip for parsing uploaded zip archives -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+    <style>
+        :root {
+            --bg-color: #030712;
+            --card-bg: #111827;
+            --accent: #22c55e;
+            --accent-glow: rgba(34, 197, 94, 0.4);
+            --cyan: #38bdf8;
+            --cyan-glow: rgba(56, 189, 248, 0.4);
+            --text: #f9fafb;
+            --text-muted: #9ca3af;
+            --border: #1f2937;
+            --tile-bg: #1e293b;
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: system-ui, -apple-system, sans-serif; }
+        body { background-color: var(--bg-color); color: var(--text); min-height: 100vh; padding: 2rem; display: flex; flex-direction: column; align-items: center; }
+        .container { width: 100%; max-width: 1200px; display: flex; flex-direction: column; gap: 1.5rem; }
+        header h1 { font-size: 1.75rem; font-weight: 700; color: var(--cyan); margin-bottom: 0.5rem; text-shadow: 0 0 10px var(--cyan-glow); }
+        header p { color: var(--text-muted); font-size: 0.95rem; }
+        
+        .grid-layout { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; }
+        @media (max-width: 950px) { .grid-layout { grid-template-columns: 1fr; } }
+
+        .card { background-color: var(--card-bg); border: 1px solid var(--border); border-radius: 0.75rem; padding: 1.5rem; display: flex; flex-direction: column; gap: 1rem; box-shadow: 0 4px 20px rgba(0,0,0,0.5); }
+        .card h2 { font-size: 1.2rem; font-weight: 600; color: var(--cyan); }
+
+        /* 4x4 Sliding Puzzle Grid */
+        .puzzle-board { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; background-color: #0f172a; padding: 10px; border-radius: 0.5rem; border: 1px solid var(--border); aspect-ratio: 1; }
+        .tile { background-color: var(--tile-bg); border: 1px solid var(--border); border-radius: 0.4rem; cursor: pointer; display: flex; flex-direction: column; align-items: center; justify-content: space-between; padding: 0.4rem; font-family: monospace; font-size: 0.75rem; color: var(--text); transition: background-color 0.15s, transform 0.15s; user-select: none; position: relative; overflow: hidden; }
+        .tile:hover:not(.empty) { background-color: #334155; border-color: var(--cyan); }
+        .tile.empty { background-color: transparent; border: 2px dashed var(--border); cursor: default; }
+        
+        .tile-header { display: flex; justify-content: space-between; width: 100%; align-items: center; font-size: 0.65rem; }
+        .tile-canvas { width: 45px; height: 45px; background: #000; border-radius: 3px; border: 1px solid #334155; display: block; }
+        .tile-footer { display: flex; justify-content: space-between; align-items: center; width: 100%; font-size: 0.6rem; }
+        
+        input[type="file"] { display: none; }
+        .upload-btn { background: var(--border); color: var(--text); padding: 2px 6px; border-radius: 3px; font-size: 0.6rem; cursor: pointer; border: 1px solid #475569; }
+        .upload-btn:hover { background: var(--cyan); color: #030712; }
+        input[type="color"] { border: none; width: 16px; height: 16px; border-radius: 50%; cursor: pointer; background: none; }
+
+        .controls-group { display: flex; gap: 1rem; align-items: center; flex-wrap: wrap; }
+        label { font-size: 0.8rem; color: var(--text-muted); display: flex; flex-direction: column; gap: 0.25rem; flex: 1; }
+        input[type="range"] { width: 100%; accent-color: var(--cyan); }
+
+        button { background-color: var(--cyan); color: #030712; font-weight: 700; border: none; border-radius: 0.5rem; padding: 0.6rem 1.25rem; cursor: pointer; transition: all 0.2s; font-size: 0.85rem; box-shadow: 0 0 10px var(--cyan-glow); }
+        button:hover { filter: brightness(1.15); transform: translateY(-1px); }
+        button.secondary { background-color: transparent; border: 1px solid var(--border); color: var(--text); box-shadow: none; }
+        button.secondary:hover { background-color: var(--border); }
+
+        .visual-container { background-color: #000; border: 2px solid #1e293b; border-radius: 0.5rem; padding: 0.5rem; position: relative; }
+        canvas.main-scope { width: 100%; height: 200px; display: block; border-radius: 0.25rem; }
+        .canvas-label { position: absolute; top: 0.75rem; left: 0.75rem; font-family: monospace; font-size: 0.7rem; pointer-events: none; color: var(--accent); text-shadow: 0 0 5px var(--accent-glow); }
+
+        .status { font-size: 0.8rem; color: var(--cyan); font-style: italic; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Modular Vector Puzzle & Sound Sequencer Studio</h1>
+            <p>Upload a `.zip` package to any puzzle tile to load its vector art and `.ogg` audio. Slide tiles to sequence audio and customize art colors!</p>
+        </header>
+
+        <div class="grid-layout">
+            <!-- 4x4 Sliding Puzzle Board Card -->
+            <div class="card">
+                <h2>Modular Puzzle Board (15-Puzzle + Audio)</h2>
+                <div class="puzzle-board" id="puzzleBoard"></div>
+                <div class="controls-group">
+                    <button onclick="shufflePuzzle()">Shuffle Puzzle</button>
+                    <span id="moveCount" class="status">Moves: 0</span>
+                </div>
+            </div>
+
+            <!-- Master Monitor & Controls Card -->
+            <div class="card">
+                <h2>Master Scope & Audio Mixer</h2>
+                <div class="controls-group">
+                    <label>Master Volume
+                        <input type="range" id="volRange" min="0" max="1" step="0.05" value="0.5">
+                    </label>
+                </div>
+                <div class="visual-container">
+                    <div class="canvas-label">MASTER VECTOR & AUDIO OSCILLOSCOPE MONITOR</div>
+                    <canvas class="main-scope" id="scopeCanvas"></canvas>
+                </div>
+                <span id="statusText" class="status">Ready. Load .zip asset packages into individual puzzle tiles.</span>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let audioCtx = null;
+        let masterGain = null;
+        let analyser = null;
+        let moveCount = 0;
+
+        // 4x4 grid representation: tiles 1 to 15, and 16 is empty (null)
+        let boardState = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, null];
+        
+        // Per-tile asset storage: tileData[id] = { points: [], audioBuffer: null, color: '#22c55e' }
+        let tileData = {};
+        for (let i = 1; i <= 15; i++) {
+            tileData[i] = { points: null, audioBuffer: null, color: '#38bdf8' };
+        }
+
+        const canvas = document.getElementById('scopeCanvas');
+        const scopeCtx = canvas.getContext('2d');
+
+        window.onload = () => {
+            renderBoard();
+            resizeCanvas();
+            window.addEventListener('resize', resizeCanvas);
+            requestAnimationFrame(scopeLoop);
+        };
+
+        function resizeCanvas() {
+            canvas.width = canvas.parentElement.clientWidth - 16;
+            canvas.height = 200;
+        }
+
+        function initAudio() {
+            if (!audioCtx) {
+                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                masterGain = audioCtx.createGain();
+                analyser = audioCtx.createAnalyser();
+                analyser.fftSize = 2048;
+
+                masterGain.gain.value = parseFloat(document.getElementById('volRange').value);
+                masterGain.connect(analyser);
+                analyser.connect(audioCtx.destination);
+            }
+            if (audioCtx.state === 'suspended') {
+                audioCtx.resume();
+            }
+        }
+
+        // --- LOAD ZIP PACKAGE INTO A SPECIFIC TILE ---
+        async function loadTileZip(event, tileId) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            initAudio();
+            setStatus(`Extracting package for Tile #${tileId}...`);
+
+            try {
+                const zip = new JSZip();
+                const zipContent = await zip.loadAsync(file);
+
+                // Find manifest XML
+                let manifestFile = null;
+                for (let path in zipContent.files) {
+                    if (path.endsWith("manifest.xml") || path.endsWith("vector_audio_manifest.xml")) {
+                        manifestFile = zipContent.file(path);
+                        break;
+                    }
+                }
+                if (!manifestFile) throw new Error("Manifest XML not found in ZIP.");
+
+                const xmlText = await manifestFile.async("text");
+                const parser = new DOMParser();
+                const xmlDoc = parser.parseFromString(xmlText, "text/xml");
+
+                // Parse Vertices
+                let pointEls = xmlDoc.getElementsByTagName("Vertex");
+                if (pointEls.length === 0) pointEls = xmlDoc.getElementsByTagName("Point");
+
+                let points = [];
+                for (let j = 0; j < pointEls.length; j++) {
+                    let pt = pointEls[j];
+                    points.push({
+                        x: parseFloat(pt.getAttribute("x")),
+                        y: parseFloat(pt.getAttribute("y")),
+                        z: parseFloat(pt.getAttribute("z") || 0)
+                    });
+                }
+                tileData[tileId].points = points;
+
+                // Find and decode Audio Asset (.ogg / .webm)
+                let audioBuffer = null;
+                for (let filename in zipContent.files) {
+                    let lower = filename.toLowerCase();
+                    if (lower.endsWith('.ogg') || lower.endsWith('.webm') || lower.endsWith('.wav')) {
+                        let audioBlob = await zipContent.files[filename].async("blob");
+                        let arrayBuffer = await audioBlob.arrayBuffer();
+                        audioBuffer = await audioCtx.decodeAudioData(arrayBuffer);
+                        break;
+                    }
+                }
+                tileData[tileId].audioBuffer = audioBuffer;
+
+                setStatus(`Tile #${tileId} successfully loaded with art & audio!`);
+                renderBoard();
+            } catch (err) {
+                console.error(err);
+                setStatus(`Error loading package for Tile #${tileId}.`);
+            }
+        }
+
+        function updateTileColor(tileId, newColor) {
+            tileData[tileId].color = newColor;
+            renderBoard();
+        }
+
+        function renderBoard() {
+            const boardContainer = document.getElementById('puzzleBoard');
+            boardContainer.innerHTML = '';
+
+            boardState.forEach((tileVal, idx) => {
+                const tile = document.createElement('div');
+                tile.className = 'tile';
+
+                if (tileVal === null) {
+                    tile.classList.add('empty');
+                } else {
+                    let data = tileData[tileVal];
+
+                    // Tile Header (ID & Color Picker)
+                    let header = document.createElement('div');
+                    header.className = 'tile-header';
+                    header.innerHTML = `<span>#${tileVal}</span>`;
+
+                    let colorPicker = document.createElement('input');
+                    colorPicker.type = 'color';
+                    colorPicker.value = data.color;
+                    colorPicker.title = "Change Art Color";
+                    colorPicker.addEventListener('input', (e) => {
+                        e.stopPropagation();
+                        updateTileColor(tileVal, e.target.value);
+                    });
+                    header.appendChild(colorPicker);
+                    tile.appendChild(header);
+
+                    // Miniature Vector Canvas Preview
+                    let miniCanvas = document.createElement('canvas');
+                    miniCanvas.className = 'tile-canvas';
+                    miniCanvas.width = 45; miniCanvas.height = 45;
+                    drawMiniVectorArt(miniCanvas, data.points, data.color);
+                    tile.appendChild(miniCanvas);
+
+                    // Tile Footer (Upload Button & Audio Status)
+                    let footer = document.createElement('div');
+                    footer.className = 'tile-footer';
+                    footer.innerHTML = `<span>${data.audioBuffer ? '🔊 OGG' : '⚠️ No Audio'}</span>`;
+
+                    let uploadLabel = document.createElement('label');
+                    uploadLabel.className = 'upload-btn';
+                    uploadLabel.innerText = 'ZIP';
+                    let fileInput = document.createElement('input');
+                    fileInput.type = 'file';
+                    fileInput.accept = '.zip';
+                    fileInput.addEventListener('change', (e) => loadTileZip(e, tileVal));
+                    uploadLabel.appendChild(fileInput);
+                    footer.appendChild(uploadLabel);
+
+                    tile.appendChild(footer);
+
+                    // Click to slide
+                    tile.addEventListener('click', () => {
+                        tryMoveTile(idx);
+                    });
+                }
+                boardContainer.appendChild(tile);
+            });
+        }
+
+        function drawMiniVectorArt(canvasEl, points, color) {
+            let ctx = canvasEl.getContext('2d');
+            ctx.fillStyle = '#000';
+            ctx.fillRect(0, 0, canvasEl.width, canvasEl.height);
+
+            if (!points || points.length === 0) return;
+
+            const xVals = points.map(p => p.x);
+            const yVals = points.map(p => p.y);
+            const minX = Math.min(...xVals), maxX = Math.max(...xVals);
+            const minY = Math.min(...yVals), maxY = Math.max(...yVals);
+            const rangeX = (maxX - minX) || 1;
+            const rangeY = (maxY - minY) || 1;
+
+            ctx.strokeStyle = color;
+            ctx.lineWidth = 1.5;
+            ctx.beginPath();
+
+            points.forEach((pt, i) => {
+                let nx = ((pt.x - minX) / rangeX) - 0.5;
+                let ny = ((pt.y - minY) / rangeY) - 0.5;
+
+                let sx = (canvasEl.width / 2) + nx * 30;
+                let sy = (canvasEl.height / 2) - ny * 30;
+
+                if (i === 0) ctx.moveTo(sx, sy);
+                else ctx.lineTo(sx, sy);
+            });
+            ctx.closePath();
+            ctx.stroke();
+        }
+
+        // Sliding puzzle movement logic
+        function tryMoveTile(clickedIdx) {
+            const emptyIdx = boardState.indexOf(null);
+            const validMoves = getValidAdjacentIndices(emptyIdx);
+
+            if (validMoves.includes(clickedIdx)) {
+                let movingTileId = boardState[clickedIdx];
+
+                boardState[emptyIdx] = movingTileId;
+                boardState[clickedIdx] = null;
+
+                moveCount++;
+                document.getElementById('moveCount').innerText = `Moves: ${moveCount}`;
+
+                playTileAudio(movingTileId);
+                renderBoard();
+            }
+        }
+
+        function getValidAdjacentIndices(idx) {
+            let row = Math.floor(idx / 4);
+            let col = idx % 4;
+            let neighbors = [];
+
+            if (row > 0) neighbors.push(idx - 4);
+            if (row < 3) neighbors.push(idx + 4);
+            if (col > 0) neighbors.push(idx - 1);
+            if (col < 3) neighbors.push(idx + 1);
+
+            return neighbors;
+        }
+
+        function shufflePuzzle() {
+            for (let i = 0; i < 100; i++) {
+                const emptyIdx = boardState.indexOf(null);
+                const validMoves = getValidAdjacentIndices(emptyIdx);
+                const randomMove = validMoves[Math.floor(Math.random() * validMoves.length)];
+
+                boardState[emptyIdx] = boardState[randomMove];
+                boardState[randomMove] = null;
+            }
+            moveCount = 0;
+            document.getElementById('moveCount').innerText = `Moves: ${moveCount}`;
+            renderBoard();
+            setStatus("Puzzle shuffled!");
+        }
+
+        function playTileAudio(tileId) {
+            initAudio();
+            let userVol = parseFloat(document.getElementById('volRange').value);
+            masterGain.gain.setValueAtTime(userVol, audioCtx.currentTime);
+
+            let data = tileData[tileId];
+
+            if (data && data.audioBuffer) {
+                // Play custom loaded .ogg audio buffer
+                let source = audioCtx.createBufferSource();
+                source.buffer = data.audioBuffer;
+                source.connect(masterGain);
+                source.start(0);
+            } else {
+                // Fallback synthesized tone if no ZIP loaded for this tile
+                let osc = audioCtx.createOscillator();
+                let gain = audioCtx.createGain();
+
+                let freq = 150 + (tileId * 35);
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+
+                let now = audioCtx.currentTime;
+                gain.gain.setValueAtTime(0.001, now);
+                gain.gain.linearRampToValueAtTime(0.2, now + 0.02);
+                gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.3);
+
+                osc.connect(gain);
+                gain.connect(masterGain);
+
+                osc.start(now);
+                osc.stop(now + 0.3);
+            }
+        }
+
+        function setStatus(msg) {
+            document.getElementById('statusText').innerText = msg;
+        }
+
+        // Oscilloscope render loop
+        function scopeLoop() {
+            scopeCtx.fillStyle = '#000803';
+            scopeCtx.fillRect(0, 0, canvas.width, canvas.height);
+
+            scopeCtx.strokeStyle = 'rgba(34, 197, 94, 0.15)';
+            scopeCtx.lineWidth = 1;
+            for (let i = 1; i < 4; i++) {
+                let y = (canvas.height / 4) * i;
+                scopeCtx.beginPath(); scopeCtx.moveTo(0, y); scopeCtx.lineTo(canvas.width, y); scopeCtx.stroke();
+            }
+
+            if (analyser) {
+                const bufferLength = analyser.frequencyBinCount;
+                const dataArray = new Uint8Array(bufferLength);
+                analyser.getByteTimeDomainData(dataArray);
+
+                scopeCtx.strokeStyle = '#22c55e';
+                scopeCtx.lineWidth = 2;
+                scopeCtx.shadowBlur = 10;
+                scopeCtx.shadowColor = '#22c55e';
+                scopeCtx.beginPath();
+
+                let sliceWidth = canvas.width / bufferLength;
+                let x = 0;
+
+                for (let i = 0; i < bufferLength; i++) {
+                    let v = dataArray[i] / 128.0;
+                    let y = (v * canvas.height) / 2;
+
+                    if (i === 0) scopeCtx.moveTo(x, y);
+                    else scopeCtx.lineTo(x, y);
+
+                    x += sliceWidth;
+                }
+                scopeCtx.stroke();
+                scopeCtx.shadowBlur = 0;
+            }
+
+            requestAnimationFrame(scopeLoop);
+        }
+    </script>
+</body>
+</html>

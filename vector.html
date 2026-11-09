@@ -1,0 +1,468 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vector Game Engine Asset Player (Fixed Single-Frame Loader)</title>
+    <!-- Include JSZip for parsing uploaded zip archives -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+    <style>
+        :root {
+            --bg-color: #030712;
+            --card-bg: #111827;
+            --accent: #22c55e;
+            --accent-glow: rgba(34, 197, 94, 0.3);
+            --cyan: #38bdf8;
+            --cyan-glow: rgba(56, 189, 248, 0.3);
+            --text: #f9fafb;
+            --text-muted: #9ca3af;
+            --border: #1f2937;
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: system-ui, -apple-system, sans-serif; }
+        body { background-color: var(--bg-color); color: var(--text); min-height: 100vh; padding: 2rem; display: flex; flex-direction: column; align-items: center; }
+        .container { width: 100%; max-width: 1200px; display: flex; flex-direction: column; gap: 1.5rem; }
+        header h1 { font-size: 1.75rem; font-weight: 700; color: var(--cyan); margin-bottom: 0.5rem; text-shadow: 0 0 10px var(--cyan-glow); }
+        header p { color: var(--text-muted); font-size: 0.95rem; }
+        
+        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; }
+        @media (max-width: 900px) { .grid { grid-template-columns: 1fr; } }
+
+        .card { background-color: var(--card-bg); border: 1px solid var(--border); border-radius: 0.75rem; padding: 1.5rem; display: flex; flex-direction: column; gap: 1rem; box-shadow: 0 4px 20px rgba(0,0,0,0.5); }
+        .card h2 { font-size: 1.2rem; font-weight: 600; color: var(--cyan); }
+        
+        .controls-group { display: flex; gap: 1rem; align-items: center; flex-wrap: wrap; }
+        label { font-size: 0.8rem; color: var(--text-muted); display: flex; flex-direction: column; gap: 0.25rem; flex: 1; }
+        input[type="file"] { background-color: var(--bg-color); border: 1px solid var(--border); padding: 0.5rem; border-radius: 0.5rem; color: var(--text); font-size: 0.85rem; width: 100%; }
+        input[type="range"] { width: 100%; accent-color: var(--cyan); }
+        
+        button { background-color: var(--cyan); color: #030712; font-weight: 700; border: none; border-radius: 0.5rem; padding: 0.6rem 1.25rem; cursor: pointer; transition: all 0.2s; font-size: 0.85rem; box-shadow: 0 0 10px var(--cyan-glow); }
+        button:hover { filter: brightness(1.15); transform: translateY(-1px); }
+        button:disabled { opacity: 0.4; cursor: not-allowed; box-shadow: none; transform: none; }
+
+        .visual-container { background-color: #000; border: 2px solid #1e293b; border-radius: 0.5rem; padding: 0.5rem; position: relative; }
+        canvas { width: 100%; height: 260px; display: block; border-radius: 0.25rem; }
+        .canvas-label { position: absolute; top: 0.75rem; left: 0.75rem; font-family: monospace; font-size: 0.7rem; pointer-events: none; }
+        
+        .full-width { grid-column: 1 / -1; }
+        .status { font-size: 0.8rem; color: var(--cyan); font-style: italic; }
+        .metadata-box { font-family: monospace; font-size: 0.75rem; background: var(--bg-color); padding: 0.75rem; border-radius: 0.4rem; border: 1px solid var(--border); color: var(--text-muted); max-height: 120px; overflow-y: auto; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Vector Game Engine Asset Player</h1>
+            <p>Drop your exported engine `.zip` package to inspect files, scrub frames, and visualize live OGG/sine wave oscilloscope waveforms.</p>
+        </header>
+
+        <div class="grid">
+            <!-- 1. ZIP Import & Inspector Card -->
+            <div class="card">
+                <h2>1. Import & ZIP Path Inspector</h2>
+                <label>Select Engine Export (.zip)
+                    <input type="file" id="zipInput" accept=".zip" onchange="loadEngineZip(event)">
+                </label>
+                <div class="metadata-box" id="manifestMeta">
+                    Manifest Status: No package loaded yet.<br>
+                    Total Frames: 0 | Audio Assets: 0 loaded
+                </div>
+                <label style="margin-top: 0.5rem;">Extracted ZIP Directory Entries:
+                    <div class="metadata-box" id="fileInspectorBox" style="color: var(--cyan);">
+                        [Awaiting ZIP upload...]
+                    </div>
+                </label>
+                <span id="statusText" class="status">Awaiting package upload...</span>
+            </div>
+
+            <!-- 2. Playback & Frame Scrubber Card -->
+            <div class="card">
+                <h2>2. Frame Scrubber & Audio Playback</h2>
+                <div class="controls-group">
+                    <label>Frame / Rotation Index
+                        <input type="range" id="frameRange" min="0" max="0" value="0" oninput="onFrameScrub()" disabled>
+                    </label>
+                </div>
+                <div class="metadata-box" id="frameMeta">
+                    Current Rotation: RX: 0° | RY: 0° | RZ: 0°<br>
+                    Active Vertex Count: 0<br>
+                    Linked Audio File: None
+                </div>
+                <div class="controls-group">
+                    <button id="playAudioBtn" onclick="togglePlaySelectedAudio()" disabled>Play Selected Frame Audio & Sine Wave</button>
+                </div>
+            </div>
+
+            <!-- 3. Dual Live Viewports -->
+            <div class="card full-width">
+                <h2>3. Asset Preview Viewports (Shape & Live Audio Scope)</h2>
+                <div class="grid" style="gap: 1rem;">
+                    <!-- 3D Perspective Viewport -->
+                    <div class="visual-container">
+                        <div class="canvas-label" style="color: var(--cyan); text-shadow: 0 0 5px var(--cyan);">3D PERSPECTIVE FRAME PREVIEW</div>
+                        <canvas id="viewport3DCanvas"></canvas>
+                    </div>
+
+                    <!-- 2D Phosphor Vector Oscilloscope & Live Sine Wave Scope -->
+                    <div class="visual-container">
+                        <div class="canvas-label" style="color: var(--accent); text-shadow: 0 0 5px var(--accent);">2D VECTOR SCOPE & OGG SINE WAVE MONITOR</div>
+                        <canvas id="scopeCanvas"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let loadedFrames = [];
+        let audioBuffers = {};
+        let audioCtx = null;
+        let currentSource = null;
+        let analyser = null;
+        let isPlaying = false;
+        let activeFrameIndex = 0;
+        let animFrameId = null;
+
+        const canvas3D = document.getElementById('viewport3DCanvas');
+        const ctx3D = canvas3D.getContext('2d');
+        const scopeCanvas = document.getElementById('scopeCanvas');
+        const scopeCtx = scopeCanvas.getContext('2d');
+
+        window.onload = () => {
+            resizeCanvases();
+            window.addEventListener('resize', resizeCanvases);
+        };
+
+        function resizeCanvases() {
+            const w = canvas3D.parentElement.clientWidth - 16;
+            canvas3D.width = w; canvas3D.height = 260;
+            scopeCanvas.width = w; scopeCanvas.height = 260;
+            renderActiveFrame();
+        }
+
+        async function loadEngineZip(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            setStatus("Extracting ZIP package...");
+            try {
+                const zip = new JSZip();
+                const zipContent = await zip.loadAsync(file);
+
+                let fileListHtml = "";
+                let allFilePaths = Object.keys(zipContent.files);
+                allFilePaths.forEach(path => {
+                    fileListHtml += `• ${path}<br>`;
+                });
+                document.getElementById('fileInspectorBox').innerHTML = fileListHtml || "[Empty archive]";
+
+                let manifestFile = null;
+                for (let path in zipContent.files) {
+                    if (path.endsWith("manifest.xml") || path.endsWith("vector_audio_manifest.xml")) {
+                        manifestFile = zipContent.file(path);
+                        break;
+                    }
+                }
+
+                if (!manifestFile) throw new Error("Manifest XML not found in ZIP archive.");
+
+                const xmlText = await manifestFile.async("text");
+                parseManifestXML(xmlText);
+
+                if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                audioBuffers = {};
+
+                let audioCount = 0;
+                for (let filename in zipContent.files) {
+                    let fileObj = zipContent.files[filename];
+                    if (fileObj.dir || filename.endsWith('/')) continue;
+
+                    let lower = filename.toLowerCase();
+                    if (lower.endsWith('.ogg') || lower.endsWith('.webm') || lower.endsWith('.wav')) {
+                        let audioBlob = await fileObj.async("blob");
+                        let arrayBuffer = await audioBlob.arrayBuffer();
+                        let audioBuf = await audioCtx.decodeAudioData(arrayBuffer);
+                        
+                        audioBuffers[filename] = audioBuf;
+                        let cleanName = filename.split('/').pop().split('\\').pop();
+                        audioBuffers[cleanName] = audioBuf;
+                        audioBuffers['audio/' + cleanName] = audioBuf;
+                        audioBuffers['/audio/' + cleanName] = audioBuf;
+                        audioCount++;
+                    }
+                }
+
+                document.getElementById('manifestMeta').innerHTML = `Manifest Status: Loaded successfully.<br>Total Frames: ${loadedFrames.length}<br>Audio Assets: ${audioCount} loaded`;
+                
+                document.getElementById('frameRange').disabled = false;
+                document.getElementById('frameRange').max = loadedFrames.length - 1;
+                document.getElementById('frameRange').value = 0;
+                document.getElementById('playAudioBtn').disabled = false;
+
+                activeFrameIndex = 0;
+                onFrameScrub();
+                setStatus("Package loaded successfully!");
+            } catch (err) {
+                console.error(err);
+                setStatus("Error loading ZIP package. Check console.");
+            }
+        }
+
+        function parseManifestXML(xmlText) {
+            const parser = new DOMParser();
+            const xmlDoc = parser.parseFromString(xmlText, "text/xml");
+
+            loadedFrames = [];
+
+            // Check for multi-frame config lists or single-frame packages
+            let configs = xmlDoc.getElementsByTagName("RotationConfig");
+            if (configs.length === 0) configs = xmlDoc.getElementsByTagName("Configuration");
+            
+            if (configs.length > 0) {
+                for (let i = 0; i < configs.length; i++) {
+                    let cfg = configs[i];
+                    let id = cfg.getAttribute("id") || i;
+                    let rx = parseFloat(cfg.getAttribute("rx") || cfg.getAttribute("rotationX") || 0);
+                    let ry = parseFloat(cfg.getAttribute("ry") || cfg.getAttribute("rotationY") || 0);
+                    let rz = parseFloat(cfg.getAttribute("rz") || cfg.getAttribute("rotationZ") || 0);
+                    let audioFile = cfg.getAttribute("audioFile") || "";
+
+                    let pointEls = cfg.getElementsByTagName("Point");
+                    if (pointEls.length === 0) pointEls = cfg.getElementsByTagName("Vertex");
+
+                    let points = [];
+                    for (let j = 0; j < pointEls.length; j++) {
+                        let pt = pointEls[j];
+                        points.push({
+                            x: parseFloat(pt.getAttribute("x")),
+                            y: parseFloat(pt.getAttribute("y")),
+                            z: parseFloat(pt.getAttribute("z"))
+                        });
+                    }
+
+                    loadedFrames.push({ id, rx, ry, rz, audioFile, points });
+                }
+            } else {
+                // Handle single-frame format (<VectorFramePackage>)
+                let pkg = xmlDoc.getElementsByTagName("VectorFramePackage")[0] || xmlDoc.documentElement;
+                let params = pkg.getElementsByTagName("Parameters")[0];
+                
+                let audioFile = params ? params.getAttribute("audioFile") : "";
+                let rx = params ? parseFloat(params.getAttribute("rotationX") || params.getAttribute("rx") || 0) : 0;
+                let ry = params ? parseFloat(params.getAttribute("rotationY") || params.getAttribute("ry") || 0) : 0;
+                let rz = params ? parseFloat(params.getAttribute("rotationZ") || params.getAttribute("rz") || 0) : 0;
+
+                let pointEls = pkg.getElementsByTagName("Vertex");
+                if (pointEls.length === 0) pointEls = pkg.getElementsByTagName("Point");
+
+                let points = [];
+                for (let j = 0; j < pointEls.length; j++) {
+                    let pt = pointEls[j];
+                    points.push({
+                        x: parseFloat(pt.getAttribute("x")),
+                        y: parseFloat(pt.getAttribute("y")),
+                        z: parseFloat(pt.getAttribute("z"))
+                    });
+                }
+
+                loadedFrames.push({ id: 0, rx, ry, rz, audioFile, points });
+            }
+        }
+
+        function setStatus(msg) {
+            document.getElementById('statusText').innerText = msg;
+        }
+
+        function onFrameScrub() {
+            activeFrameIndex = parseInt(document.getElementById('frameRange').value);
+            if (loadedFrames.length === 0) return;
+
+            let frame = loadedFrames[activeFrameIndex];
+            document.getElementById('frameMeta').innerHTML = `
+                Frame Index: ${activeFrameIndex} / ${loadedFrames.length - 1}<br>
+                Rotation: RX: ${frame.rx}° | RY: ${frame.ry}° | RZ: ${frame.rz}°<br>
+                Active Vertex Count: ${frame.points.length}<br>
+                Linked Audio File: ${frame.audioFile || 'None'}
+            `;
+
+            renderActiveFrame();
+        }
+
+        function togglePlaySelectedAudio() {
+            if (isPlaying) {
+                stopAudio();
+                return;
+            }
+
+            if (loadedFrames.length === 0) return;
+            let frame = loadedFrames[activeFrameIndex];
+            
+            if (!frame.audioFile || frame.audioFile.trim() === "") {
+                setStatus("Selected frame has no linked audio asset.");
+                return;
+            }
+
+            let audioBuf = null;
+            let baseName = frame.audioFile.split('/').pop().split('\\').pop();
+            for (let key in audioBuffers) {
+                if (key.includes(baseName)) {
+                    audioBuf = audioBuffers[key];
+                    break;
+                }
+            }
+
+            if (!audioBuf) {
+                setStatus(`Audio asset "${frame.audioFile}" not found in loaded ZIP archive.`);
+                return;
+            }
+
+            if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            audioCtx.resume();
+
+            currentSource = audioCtx.createBufferSource();
+            currentSource.buffer = audioBuf;
+
+            analyser = audioCtx.createAnalyser();
+            analyser.fftSize = 2048;
+
+            currentSource.connect(analyser);
+            analyser.connect(audioCtx.destination);
+
+            currentSource.onended = () => { 
+                stopAudio(); 
+            };
+            
+            currentSource.start(0);
+            isPlaying = true;
+            document.getElementById('playAudioBtn').innerText = "Stop Audio & Scope";
+
+            requestAnimationFrame(audioScopeLoop);
+        }
+
+        function stopAudio() {
+            if (currentSource) {
+                try { currentSource.stop(); } catch(e) {}
+                currentSource.disconnect();
+            }
+            if (animFrameId) cancelAnimationFrame(animFrameId);
+            isPlaying = false;
+            document.getElementById('playAudioBtn').innerText = "Play Selected Frame Audio & Sine Wave";
+            renderActiveFrame();
+        }
+
+        function audioScopeLoop() {
+            if (!isPlaying) return;
+            renderActiveFrame(true);
+            animFrameId = requestAnimationFrame(audioScopeLoop);
+        }
+
+        function renderActiveFrame(isAudioActive = false) {
+            if (loadedFrames.length === 0) return;
+            let frame = loadedFrames[activeFrameIndex];
+            draw3DViewport(frame.points);
+            draw2DVectorScope(frame.points, isAudioActive);
+        }
+
+        function draw3DViewport(points) {
+            ctx3D.fillStyle = '#030712';
+            ctx3D.fillRect(0, 0, canvas3D.width, canvas3D.height);
+
+            if (!points || points.length === 0) return;
+
+            let cx = canvas3D.width / 2;
+            let cy = canvas3D.height / 2;
+            let fov = 300;
+
+            ctx3D.strokeStyle = '#38bdf8';
+            ctx3D.lineWidth = 1.5;
+            ctx3D.beginPath();
+
+            points.forEach((pt, i) => {
+                let scale = fov / (pt.z + 200);
+                let sx = cx + pt.x * scale;
+                let sy = cy + pt.y * scale;
+                if (i === 0) ctx3D.moveTo(sx, sy);
+                else ctx3D.lineTo(sx, sy);
+            });
+            ctx3D.closePath();
+            ctx3D.stroke();
+        }
+
+        function draw2DVectorScope(points, isAudioActive) {
+            scopeCtx.fillStyle = '#000803';
+            scopeCtx.fillRect(0, 0, scopeCanvas.width, scopeCanvas.height);
+
+            scopeCtx.strokeStyle = 'rgba(34, 197, 94, 0.15)';
+            scopeCtx.lineWidth = 1;
+            for (let i = 1; i < 8; i++) {
+                let x = (scopeCanvas.width / 8) * i;
+                let y = (scopeCanvas.height / 8) * i;
+                scopeCtx.beginPath(); scopeCtx.moveTo(x, 0); scopeCtx.lineTo(x, scopeCanvas.height); scopeCtx.stroke();
+                scopeCtx.beginPath(); scopeCtx.moveTo(0, y); scopeCtx.lineTo(scopeCanvas.width, y); scopeCtx.stroke();
+            }
+
+            if (isAudioActive && analyser) {
+                const bufferLength = analyser.frequencyBinCount;
+                const dataArray = new Uint8Array(bufferLength);
+                analyser.getByteTimeDomainData(dataArray);
+
+                scopeCtx.strokeStyle = '#38bdf8';
+                scopeCtx.lineWidth = 2;
+                scopeCtx.shadowBlur = 8;
+                scopeCtx.shadowColor = '#38bdf8';
+                scopeCtx.beginPath();
+
+                let sliceWidth = scopeCanvas.width / bufferLength;
+                let x = 0;
+
+                for (let i = 0; i < bufferLength; i++) {
+                    let v = dataArray[i] / 128.0;
+                    let y = (v * scopeCanvas.height) / 2;
+
+                    if (i === 0) scopeCtx.moveTo(x, y);
+                    else scopeCtx.lineTo(x, y);
+
+                    x += sliceWidth;
+                }
+                scopeCtx.stroke();
+                scopeCtx.shadowBlur = 0;
+            }
+
+            if (!points || points.length === 0) return;
+
+            const xVals = points.map(p => p.x);
+            const yVals = points.map(p => p.y);
+            const minX = Math.min(...xVals), maxX = Math.max(...xVals);
+            const minY = Math.min(...yVals), maxY = Math.max(...yVals);
+            const rangeX = (maxX - minX) || 1;
+            const rangeY = (maxY - minY) || 1;
+
+            const centerX = scopeCanvas.width / 2;
+            const centerY = scopeCanvas.height / 2;
+
+            scopeCtx.strokeStyle = '#22c55e';
+            scopeCtx.lineWidth = 2.5;
+            scopeCtx.shadowBlur = 12;
+            scopeCtx.shadowColor = '#22c55e';
+            scopeCtx.beginPath();
+
+            points.forEach((pt, i) => {
+                let nx = ((pt.x - minX) / rangeX) - 0.5;
+                let ny = ((pt.y - minY) / rangeY) - 0.5;
+
+                let screenX = centerX + nx * 160;
+                let screenY = centerY - ny * 160;
+
+                if (i === 0) scopeCtx.moveTo(screenX, screenY);
+                else scopeCtx.lineTo(screenX, screenY);
+
+                scopeCtx.fillStyle = '#38bdf8';
+                scopeCtx.fillRect(screenX - 3, screenY - 3, 6, 6);
+                scopeCtx.fillStyle = '#22c55e';
+            });
+
+            scopeCtx.stroke();
+            scopeCtx.shadowBlur = 0;
+        }
+    </script>
+</body>
+</html>

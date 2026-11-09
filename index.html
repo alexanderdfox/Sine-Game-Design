@@ -1,0 +1,691 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>3D & 2D Vector Game Engine Studio with Frame ZIP Export</title>
+    <!-- Include JSZip for bulk .ogg zip packaging -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+    <style>
+        :root {
+            --bg-color: #030712;
+            --card-bg: #111827;
+            --accent: #22c55e;
+            --accent-glow: rgba(34, 197, 94, 0.3);
+            --cyan: #38bdf8;
+            --cyan-glow: rgba(56, 189, 248, 0.3);
+            --text: #f9fafb;
+            --text-muted: #9ca3af;
+            --border: #1f2937;
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: system-ui, -apple-system, sans-serif; }
+        body { background-color: var(--bg-color); color: var(--text); min-height: 100vh; padding: 2rem; display: flex; flex-direction: column; align-items: center; }
+        .container { width: 100%; max-width: 1200px; display: flex; flex-direction: column; gap: 1.5rem; }
+        header h1 { font-size: 1.75rem; font-weight: 700; color: var(--cyan); margin-bottom: 0.5rem; text-shadow: 0 0 10px var(--cyan-glow); }
+        header p { color: var(--text-muted); font-size: 0.95rem; }
+        
+        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; }
+        @media (max-width: 900px) { .grid { grid-template-columns: 1fr; } }
+
+        .card { background-color: var(--card-bg); border: 1px solid var(--border); border-radius: 0.75rem; padding: 1.5rem; display: flex; flex-direction: column; gap: 1rem; box-shadow: 0 4px 20px rgba(0,0,0,0.5); }
+        .card h2 { font-size: 1.2rem; font-weight: 600; color: var(--cyan); }
+        textarea { width: 100%; height: 110px; background-color: var(--bg-color); border: 1px solid var(--border); border-radius: 0.5rem; color: var(--text); padding: 0.75rem; font-family: monospace; font-size: 0.75rem; resize: vertical; }
+        textarea:focus { outline: none; border-color: var(--cyan); }
+        
+        .controls-group { display: flex; gap: 1rem; align-items: center; flex-wrap: wrap; }
+        label { font-size: 0.8rem; color: var(--text-muted); display: flex; flex-direction: column; gap: 0.25rem; flex: 1; }
+        input[type="range"] { width: 100%; accent-color: var(--cyan); }
+        select { background-color: var(--bg-color); border: 1px solid var(--border); color: var(--text); padding: 0.5rem; border-radius: 0.4rem; font-size: 0.85rem; width: 100%; }
+        
+        button { background-color: var(--cyan); color: #030712; font-weight: 700; border: none; border-radius: 0.5rem; padding: 0.6rem 1.25rem; cursor: pointer; transition: all 0.2s; font-size: 0.85rem; box-shadow: 0 0 10px var(--cyan-glow); }
+        button:hover { filter: brightness(1.15); transform: translateY(-1px); }
+        button.secondary { background-color: transparent; border: 1px solid var(--border); color: var(--text); box-shadow: none; }
+        button.secondary:hover { background-color: var(--border); }
+        button.success { background-color: var(--accent); color: #030712; box-shadow: 0 0 10px var(--accent-glow); }
+        button:disabled { opacity: 0.4; cursor: not-allowed; box-shadow: none; transform: none; }
+
+        .visual-container { background-color: #000; border: 2px solid #1e293b; border-radius: 0.5rem; padding: 0.5rem; position: relative; }
+        canvas { width: 100%; height: 240px; display: block; border-radius: 0.25rem; }
+        .canvas-label { position: absolute; top: 0.75rem; left: 0.75rem; font-family: monospace; font-size: 0.7rem; pointer-events: none; }
+        
+        .full-width { grid-column: 1 / -1; }
+        .actions { display: flex; gap: 1rem; flex-wrap: wrap; }
+        .status { font-size: 0.8rem; color: var(--cyan); font-style: italic; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>3D & 2D Vector Game Engine Studio</h1>
+            <p>Manually pre-rotate geometry, preview live, and export individual frames or batch combinatorial assets as ZIP packages.</p>
+        </header>
+
+        <div class="grid">
+            <!-- 1. OpenSCAD & Manual XYZ Pre-Rotation Card -->
+            <div class="card">
+                <h2>1. OpenSCAD & Manual XYZ Pre-Rotation</h2>
+                <textarea id="coord-input">polyhedron(
+  points=[
+    [0, 20, 5],
+    [15, 30, 10],
+    [30, 20, 15],
+    [25, 0, 10],
+    [5, 0, 2]
+  ],
+  faces=[[0,1,2],[2,3,4]]
+);</textarea>
+                
+                <div class="controls-group">
+                    <label>Manual Rot X (RX) <input type="range" id="rxRange" min="0" max="360" value="0" oninput="updateManualRotation()"></label>
+                    <label>Manual Rot Y (RY) <input type="range" id="ryRange" min="0" max="360" value="0" oninput="updateManualRotation()"></label>
+                    <label>Manual Rot Z (RZ) <input type="range" id="rzRange" min="0" max="360" value="0" oninput="updateManualRotation()"></label>
+                </div>
+
+                <div class="controls-group">
+                    <label>Sweep Direction
+                        <select id="directionSelect" onchange="buildAudioBuffer()">
+                            <option value="forward">Forward (0% → 100%)</option>
+                            <option value="reverse">Reverse (100% → 0%)</option>
+                            <option value="pingpong">Ping-Pong (Forward & Return)</option>
+                        </select>
+                    </label>
+                </div>
+                <div class="actions">
+                    <button class="secondary" onclick="processGeometry()">Load Geometry</button>
+                    <button class="success" onclick="exportCurrentFrameZip()">Export Current Frame ZIP (.zip)</button>
+                </div>
+            </div>
+
+            <!-- 2. Combinatorial Rotation & Batch Exporter Card -->
+            <div class="card">
+                <h2>2. Combinatorial Engine & Bulk ZIP Export</h2>
+                <div class="controls-group">
+                    <label>Rotational Resolution
+                        <select id="stepSelect">
+                            <option value="90">Coarse (90° - 4 steps)</option>
+                            <option value="45" selected>Standard (45° - 8 steps)</option>
+                            <option value="30">Detailed (30° - 12 steps)</option>
+                        </select>
+                    </label>
+                    <label>Rotation Space
+                        <select id="spaceSelect">
+                            <option value="3d">3D Axes (X, Y, Z)</option>
+                            <option value="2d">2D Axis (Z Only)</option>
+                        </select>
+                    </label>
+                </div>
+                <div class="actions">
+                    <button class="success" onclick="exportCombinatorialZip()" id="exportZipBtn">Export Bulk Engine Package (.zip)</button>
+                </div>
+                <span id="statusText" class="status">Ready. Import OpenSCAD geometry to begin.</span>
+            </div>
+
+            <!-- 3. Dual Live Monitors: 3D Viewport & 2D Vector Scope -->
+            <div class="card full-width">
+                <h2>3. Live Visualizers (3D Perspective View & 2D Vector Oscilloscope)</h2>
+                <div class="controls-bar" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem; margin-bottom: 0.5rem;">
+                    <div class="controls-group" style="margin: 0; flex: none;">
+                        <label style="flex: none;">Base Freq (Hz)
+                            <input type="range" id="freqRange" min="100" max="800" value="300" oninput="updateParams()" style="width: 120px;">
+                        </label>
+                        <label style="flex: none;">Duration (s)
+                            <input type="range" id="durationRange" min="1" max="5" value="2" oninput="updateParams()" style="width: 100px;">
+                        </label>
+                    </div>
+                    <button id="playBtn" onclick="togglePlayAudio()">Play Live Audio Motion</button>
+                </div>
+
+                <div class="grid" style="gap: 1rem;">
+                    <!-- 3D Perspective Viewport -->
+                    <div class="visual-container">
+                        <div class="canvas-label" style="color: var(--cyan); text-shadow: 0 0 5px var(--cyan);">3D PERSPECTIVE WIREFRAME VIEWPORT</div>
+                        <canvas id="viewport3DCanvas"></canvas>
+                    </div>
+
+                    <!-- 2D Phosphor Vector Oscilloscope -->
+                    <div class="visual-container">
+                        <div class="canvas-label" style="color: var(--accent); text-shadow: 0 0 5px var(--accent);">2D PHOSPHOR VECTOR OSCILLOSCOPE</div>
+                        <canvas id="scopeCanvas"></canvas>
+                    </div>
+                </div>
+
+                <div class="controls-group" style="margin-top: 0.5rem;">
+                    <label>Rotation Reactivity
+                        <input type="range" id="rotSensitivity" min="0.5" max="3.0" step="0.1" value="1.5">
+                    </label>
+                    <label>Translation Range
+                        <input type="range" id="transSensitivity" min="10" max="100" step="5" value="40">
+                    </label>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let rawPoints = [];
+        let currentFaces = [];
+        let currentPoints = [];
+        let is3D = false;
+        let baseFrequency = 300;
+        let duration = 2;
+        
+        let audioCtx = null;
+        let audioBuffer = null;
+        let audioSource = null;
+        let analyser = null;
+        let isPlaying = false;
+        let animFrameId = null;
+        let manualRotationAngle = 0;
+
+        const canvas3D = document.getElementById('viewport3DCanvas');
+        const ctx3D = canvas3D.getContext('2d');
+        const scopeCanvas = document.getElementById('scopeCanvas');
+        const scopeCtx = scopeCanvas.getContext('2d');
+
+        window.onload = () => {
+            processGeometry();
+            resizeCanvases();
+            window.addEventListener('resize', resizeCanvases);
+            renderAllFrames(0, 0);
+        };
+
+        function resizeCanvases() {
+            const w = canvas3D.parentElement.clientWidth - 16;
+            canvas3D.width = w; canvas3D.height = 240;
+            scopeCanvas.width = w; scopeCanvas.height = 240;
+        }
+
+        function parseOpenSCAD(text) {
+            let cleaned = text.replace(/\/\*[\s\S]*?\*\/|\/\/.*/g, '');
+
+            let kwIdx = cleaned.indexOf('points');
+            let searchStart = kwIdx !== -1 ? kwIdx : 0;
+            let startIdx = cleaned.indexOf('[', searchStart);
+            if (startIdx === -1) startIdx = cleaned.indexOf('[');
+            if (startIdx === -1) throw new Error("No coordinate brackets found");
+
+            let depth = 0, endIdx = -1;
+            for (let i = startIdx; i < cleaned.length; i++) {
+                if (cleaned[i] === '[') depth++;
+                else if (cleaned[i] === ']') {
+                    depth--;
+                    if (depth === 0) { endIdx = i; break; }
+                }
+            }
+
+            if (endIdx === -1) throw new Error("Unmatched brackets");
+            let subStr = cleaned.substring(startIdx + 1, endIdx);
+
+            let points = [];
+            let innerDepth = 0;
+            let currentPtStr = "";
+
+            for (let i = 0; i < subStr.length; i++) {
+                let char = subStr[i];
+                if (char === '[') {
+                    innerDepth++;
+                    currentPtStr = "";
+                } else if (char === ']') {
+                    innerDepth--;
+                    if (innerDepth === 0) {
+                        let nums = currentPtStr.split(',').map(n => parseFloat(n.trim())).filter(n => !isNaN(n));
+                        if (nums.length >= 2) {
+                            points.push({ x: nums[0], y: nums[1], z: nums[2] !== undefined ? nums[2] : 0 });
+                        }
+                    }
+                } else if (innerDepth > 0) {
+                    currentPtStr += char;
+                }
+            }
+
+            let faces = [];
+            let facesKwIdx = cleaned.indexOf('faces');
+            if (facesKwIdx !== -1) {
+                let fStart = cleaned.indexOf('[', facesKwIdx);
+                if (fStart !== -1) {
+                    let fDepth = 0, fEnd = -1;
+                    for (let i = fStart; i < cleaned.length; i++) {
+                        if (cleaned[i] === '[') fDepth++;
+                        else if (cleaned[i] === ']') {
+                            fDepth--;
+                            if (fDepth === 0) { fEnd = i; break; }
+                        }
+                    }
+                    if (fEnd !== -1) {
+                        let fSub = cleaned.substring(fStart + 1, fEnd);
+                        let fInnerDepth = 0;
+                        let fCurr = "";
+                        for (let i = 0; i < fSub.length; i++) {
+                            let char = fSub[i];
+                            if (char === '[') { fInnerDepth++; fCurr = ""; }
+                            else if (char === ']') {
+                                fInnerDepth--;
+                                if (fInnerDepth === 0) {
+                                    let fNums = fCurr.split(',').map(n => parseInt(n.trim())).filter(n => !isNaN(n));
+                                    if (fNums.length >= 3) faces.push(fNums);
+                                }
+                            } else if (fInnerDepth > 0) { fCurr += char; }
+                        }
+                    }
+                }
+            }
+
+            return { points, faces };
+        }
+
+        function processGeometry() {
+            const text = document.getElementById('coord-input').value;
+            try {
+                let parsed = parseOpenSCAD(text);
+                rawPoints = parsed.points;
+                currentFaces = parsed.faces;
+
+                const zVals = rawPoints.map(p => p.z);
+                const uniqueZ = new Set(zVals);
+                is3D = uniqueZ.size > 1 && Math.max(...zVals) !== 0;
+
+                updateManualRotation();
+                setStatus(`Loaded ${rawPoints.length} points successfully. Mode: ${is3D ? '3D' : '2D'}.`);
+            } catch (err) {
+                console.error(err);
+                setStatus("Error parsing OpenSCAD syntax.");
+            }
+        }
+
+        function updateManualRotation() {
+            if (rawPoints.length === 0) return;
+            const rx = parseFloat(document.getElementById('rxRange').value);
+            const ry = parseFloat(document.getElementById('ryRange').value);
+            const rz = parseFloat(document.getElementById('rzRange').value);
+
+            currentPoints = rawPoints.map(p => rotatePoint(p, rx, ry, rz));
+            buildAudioBuffer();
+            renderAllFrames(manualRotationAngle, 0);
+        }
+
+        function setStatus(msg) {
+            document.getElementById('statusText').innerText = msg;
+        }
+
+        function updateParams() {
+            baseFrequency = parseFloat(document.getElementById('freqRange').value);
+            duration = parseFloat(document.getElementById('durationRange').value);
+            buildAudioBuffer();
+        }
+
+        function rotatePoint(pt, rx, ry, rz) {
+            let radX = rx * Math.PI / 180;
+            let radY = ry * Math.PI / 180;
+            let radZ = rz * Math.PI / 180;
+
+            let y1 = pt.y * Math.cos(radX) - pt.z * Math.sin(radX);
+            let z1 = pt.y * Math.sin(radX) + pt.z * Math.cos(radX);
+            let x1 = pt.x;
+
+            let x2 = x1 * Math.cos(radY) + z1 * Math.sin(radY);
+            let z2 = -x1 * Math.sin(radY) + z1 * Math.cos(radY);
+            let y2 = y1;
+
+            let x3 = x2 * Math.cos(radZ) - y2 * Math.sin(radZ);
+            let y3 = x2 * Math.sin(radZ) + y2 * Math.cos(radZ);
+            let z3 = z2;
+
+            return { x: x3, y: y3, z: z3 };
+        }
+
+        function generatePCM(points, freqBase, dur) {
+            if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            const sampleRate = audioCtx.sampleRate;
+            const numSamples = Math.floor(sampleRate * dur);
+            const pcm = new Float32Array(numSamples);
+            if (points.length === 0) return pcm;
+
+            const direction = document.getElementById('directionSelect').value;
+            const xVals = points.map(p => p.x), yVals = points.map(p => p.y), zVals = points.map(p => p.z);
+            const minX = Math.min(...xVals), maxX = Math.max(...xVals), rangeX = (maxX - minX) || 1;
+            const minY = Math.min(...yVals), maxY = Math.max(...yVals), rangeY = (maxY - minY) || 1;
+            const minZ = Math.min(...zVals), maxZ = Math.max(...zVals), rangeZ = (maxZ - minZ) || 1;
+
+            for (let i = 0; i < numSamples; i++) {
+                let progress = i / numSamples;
+                if (direction === 'reverse') progress = 1.0 - progress;
+                else if (direction === 'pingpong') progress = progress <= 0.5 ? progress * 2 : (1.0 - progress) * 2;
+
+                let t = i / sampleRate;
+                let idx = progress * points.length;
+                let low = Math.floor(idx) % points.length;
+                let high = (low + 1) % points.length;
+                let blend = idx - Math.floor(idx);
+
+                let ix = xVals[low] + (xVals[high] - xVals[low]) * blend;
+                let sample = Math.sin(2 * Math.PI * (freqBase * (0.5 + ((ix - minX) / rangeX))) * t);
+
+                let iy = yVals[low] + (yVals[high] - yVals[low]) * blend;
+                sample += Math.sin(2 * Math.PI * ((freqBase * 1.5) * (0.5 + ((iy - minY) / rangeY))) * t) * 0.75;
+
+                let iz = zVals[low] + (zVals[high] - zVals[low]) * blend;
+                sample += Math.sin(2 * Math.PI * ((freqBase * 2.0) * (0.5 + ((iz - minZ) / rangeZ))) * t) * 0.5;
+                sample /= 2.25;
+
+                pcm[i] = sample * 0.5;
+            }
+            return pcm;
+        }
+
+        function buildAudioBuffer() {
+            if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            const pcm = generatePCM(currentPoints, baseFrequency, duration);
+            audioBuffer = audioCtx.createBuffer(1, pcm.length, audioCtx.sampleRate);
+            audioBuffer.getChannelData(0).set(pcm);
+        }
+
+        // --- EXPORT CURRENT FRAME AS ZIP (.ogg + .xml manifest) ---
+        async function exportCurrentFrameZip() {
+            const rx = document.getElementById('rxRange').value;
+            const ry = document.getElementById('ryRange').value;
+            const rz = document.getElementById('rzRange').value;
+
+            const zip = new JSZip();
+            const offlineCtx = new (window.AudioContext || window.webkitAudioContext)();
+            const pcm = generatePCM(currentPoints, baseFrequency, duration);
+
+            let buf = offlineCtx.createBuffer(1, pcm.length, 44100);
+            buf.getChannelData(0).set(pcm);
+            let src = offlineCtx.createBufferSource();
+            src.buffer = buf;
+
+            let dest = offlineCtx.createMediaStreamDestination();
+            src.connect(dest);
+
+            let recorder = new MediaRecorder(dest.stream, { mimeType: 'audio/webm;codecs=opus' });
+            let chunks = [];
+            recorder.ondataavailable = e => chunks.push(e.data);
+            
+            let promise = new Promise(resolve => {
+                recorder.onstop = () => resolve(new Blob(chunks, { type: 'audio/webm' }));
+            });
+
+            recorder.start();
+            src.start(0);
+            setTimeout(() => { recorder.stop(); src.stop(); }, (duration * 1000) + 50);
+
+            let audioBlob = await promise;
+            zip.file("audio/current_frame.ogg", audioBlob);
+
+            let xml = '<?xml version="1.0" encoding="UTF-8"?>\n<VectorFramePackage>\n';
+            xml += `  <Parameters baseFrequency="${baseFrequency}" duration="${duration}" rotationX="${rx}" rotationY="${ry}" rotationZ="${rz}" audioFile="audio/current_frame.ogg" />\n`;
+            xml += `  <Vertices>\n`;
+            currentPoints.forEach((p, idx) => {
+                xml += `    <Vertex id="${idx}" x="${p.x.toFixed(3)}" y="${p.y.toFixed(3)}" z="${p.z.toFixed(3)}" />\n`;
+            });
+            xml += `  </Vertices>\n`;
+            xml += '</VectorFramePackage>';
+            zip.file("manifest.xml", xml);
+
+            const content = await zip.generateAsync({ type: 'blob' });
+            const url = URL.createObjectURL(content);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `vector_frame_${rx}_${ry}_${rz}.zip`;
+            a.click();
+            URL.revokeObjectURL(url);
+            setStatus("Current frame ZIP package (.ogg + XML) exported successfully!");
+        }
+
+        // --- BATCH EXPORT ZIP ---
+        async function exportCombinatorialZip() {
+            const btn = document.getElementById('exportZipBtn');
+            btn.innerText = "Generating ZIP Archive...";
+            btn.disabled = true;
+
+            try {
+                const step = parseInt(document.getElementById('stepSelect').value);
+                const space = document.getElementById('spaceSelect').value;
+                const zip = new JSZip();
+                let xml = '<?xml version="1.0" encoding="UTF-8"?>\n<GameEngineVectorAudioLibrary>\n';
+                
+                let count = 0;
+                let rotConfigs = [];
+
+                if (space === '3d') {
+                    for (let rx = 0; rx < 360; rx += step) {
+                        for (let ry = 0; ry < 360; ry += step) {
+                            for (let rz = 0; rz < 360; rz += step) {
+                                count++;
+                                rotConfigs.push({ id: count, rx, ry, rz });
+                            }
+                        }
+                    }
+                } else {
+                    for (let rz = 0; rz < 360; rz += step) {
+                        count++;
+                        rotConfigs.push({ id: count, rx: 0, ry: 0, rz });
+                    }
+                }
+
+                const offlineCtx = new (window.AudioContext || window.webkitAudioContext)();
+
+                for (let config of rotConfigs) {
+                    let rotated = rawPoints.map(p => rotatePoint(p, config.rx, config.ry, config.rz));
+                    let pcm = generatePCM(rotated, baseFrequency, duration);
+
+                    let buf = offlineCtx.createBuffer(1, pcm.length, 44100);
+                    buf.getChannelData(0).set(pcm);
+                    let src = offlineCtx.createBufferSource();
+                    src.buffer = buf;
+
+                    let dest = offlineCtx.createMediaStreamDestination();
+                    src.connect(dest);
+
+                    let recorder = new MediaRecorder(dest.stream, { mimeType: 'audio/webm;codecs=opus' });
+                    let chunks = [];
+                    recorder.ondataavailable = e => chunks.push(e.data);
+                    
+                    let promise = new Promise(resolve => {
+                        recorder.onstop = () => resolve(new Blob(chunks, { type: 'audio/webm' }));
+                    });
+
+                    recorder.start();
+                    src.start(0);
+                    setTimeout(() => { recorder.stop(); src.stop(); }, (duration * 1000) + 50);
+
+                    let audioBlob = await promise;
+                    let filename = `rot_x${config.rx}_y${config.ry}_z${config.rz}.ogg`;
+                    zip.file(`audio/${filename}`, audioBlob);
+
+                    xml += `  <RotationConfig id="${config.id}" rx="${config.rx}" ry="${config.ry}" rz="${config.rz}" audioFile="audio/${filename}">\n`;
+                    xml += `    <Transordinates>\n`;
+                    rotated.forEach((p, idx) => {
+                        xml += `      <Point index="${idx}" x="${p.x.toFixed(3)}" y="${p.y.toFixed(3)}" z="${p.z.toFixed(3)}" />\n`;
+                    });
+                    xml += `    </Transordinates>\n`;
+                    xml += `  </RotationConfig>\n`;
+                }
+
+                xml += '</GameEngineVectorAudioLibrary>';
+                zip.file('vector_audio_manifest.xml', xml);
+
+                const content = await zip.generateAsync({ type: 'blob' });
+                const url = URL.createObjectURL(content);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `vector_game_engine_assets_${space}.zip`;
+                a.click();
+                URL.revokeObjectURL(url);
+
+                setStatus(`Successfully exported ZIP package with ${count} assets!`);
+            } catch (err) {
+                console.error(err);
+                setStatus("Error generating ZIP package.");
+            } finally {
+                btn.innerText = "Export Bulk Engine Package (.zip)";
+                btn.disabled = false;
+            }
+        }
+
+        function togglePlayAudio() {
+            if (isPlaying) {
+                stopAudio();
+                return;
+            }
+
+            if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            audioCtx.resume();
+
+            audioSource = audioCtx.createBufferSource();
+            audioSource.buffer = audioBuffer;
+
+            analyser = audioCtx.createAnalyser();
+            analyser.fftSize = 2048;
+
+            audioSource.connect(analyser);
+            analyser.connect(audioCtx.destination);
+
+            audioSource.onended = () => stopAudio();
+            audioSource.start(0);
+            isPlaying = true;
+            document.getElementById('playBtn').innerText = "Stop Live Audio";
+
+            requestAnimationFrame(motionLoop);
+        }
+
+        function stopAudio() {
+            if (audioSource) {
+                try { audioSource.stop(); } catch(e) {}
+                audioSource.disconnect();
+            }
+            if (animFrameId) cancelAnimationFrame(animFrameId);
+            isPlaying = false;
+            document.getElementById('playBtn').innerText = "Play Live Audio Motion";
+            renderAllFrames(0, 0);
+        }
+
+        function motionLoop() {
+            if (!isPlaying) return;
+
+            const bufferLength = analyser.frequencyBinCount;
+            const dataArray = new Uint8Array(bufferLength);
+            analyser.getByteTimeDomainData(dataArray);
+
+            let sum = 0;
+            for (let i = 0; i < bufferLength; i++) {
+                let v = (dataArray[i] - 128) / 128;
+                sum += v * v;
+            }
+            let rms = Math.sqrt(sum / bufferLength);
+
+            let peakSum = 0;
+            for (let i = 0; i < bufferLength / 4; i++) {
+                peakSum += Math.abs((dataArray[i] - 128) / 128);
+            }
+
+            manualRotationAngle += rms * parseFloat(document.getElementById('rotSensitivity').value) * 0.1;
+            let transOffset = (peakSum / (bufferLength / 4)) * parseFloat(document.getElementById('transSensitivity').value);
+
+            renderAllFrames(manualRotationAngle, transOffset);
+            animFrameId = requestAnimationFrame(motionLoop);
+        }
+
+        function renderAllFrames(rotAngle, transOffset) {
+            draw3DViewport();
+            draw2DVectorScope(rotAngle, transOffset);
+        }
+
+        function draw3DViewport() {
+            ctx3D.fillStyle = '#030712';
+            ctx3D.fillRect(0, 0, canvas3D.width, canvas3D.height);
+
+            if (currentPoints.length === 0) return;
+
+            let cx = canvas3D.width / 2;
+            let cy = canvas3D.height / 2;
+            let fov = 300;
+
+            ctx3D.strokeStyle = '#38bdf8';
+            ctx3D.lineWidth = 1.5;
+
+            if (currentFaces.length > 0) {
+                currentFaces.forEach(face => {
+                    ctx3D.beginPath();
+                    face.forEach((idx, i) => {
+                        let pt = currentPoints[idx];
+                        let zDist = pt.z + 200;
+                        let scale = fov / (zDist > 0 ? zDist : 1);
+                        let sx = cx + pt.x * scale;
+                        let sy = cy + pt.y * scale;
+                        if (i === 0) ctx3D.moveTo(sx, sy);
+                        else ctx3D.lineTo(sx, sy);
+                    });
+                    ctx3D.closePath();
+                    ctx3D.fillStyle = 'rgba(56, 189, 248, 0.05)';
+                    ctx3D.fill();
+                    ctx3D.stroke();
+                });
+            } else {
+                ctx3D.beginPath();
+                currentPoints.forEach((pt, i) => {
+                    let scale = fov / (pt.z + 200);
+                    let sx = cx + pt.x * scale;
+                    let sy = cy + pt.y * scale;
+                    if (i === 0) ctx3D.moveTo(sx, sy);
+                    else ctx3D.lineTo(sx, sy);
+                });
+                ctx3D.stroke();
+            }
+        }
+
+        function draw2DVectorScope(rotAngle, transOffset) {
+            scopeCtx.fillStyle = '#000803';
+            scopeCtx.fillRect(0, 0, scopeCanvas.width, scopeCanvas.height);
+
+            scopeCtx.strokeStyle = 'rgba(34, 197, 94, 0.15)';
+            scopeCtx.lineWidth = 1;
+            for (let i = 1; i < 8; i++) {
+                let x = (scopeCanvas.width / 8) * i;
+                let y = (scopeCanvas.height / 8) * i;
+                scopeCtx.beginPath(); scopeCtx.moveTo(x, 0); scopeCtx.lineTo(x, scopeCanvas.height); scopeCtx.stroke();
+                scopeCtx.beginPath(); scopeCtx.moveTo(0, y); scopeCtx.lineTo(scopeCanvas.width, y); scopeCtx.stroke();
+            }
+
+            if (currentPoints.length === 0) return;
+
+            const xVals = currentPoints.map(p => p.x);
+            const yVals = currentPoints.map(p => p.y);
+            const minX = Math.min(...xVals), maxX = Math.max(...xVals);
+            const minY = Math.min(...yVals), maxY = Math.max(...yVals);
+            const rangeX = (maxX - minX) || 1;
+            const rangeY = (maxY - minY) || 1;
+
+            const centerX = (scopeCanvas.width / 2) + Math.sin(rotAngle * 2) * transOffset;
+            const centerY = (scopeCanvas.height / 2) + Math.cos(rotAngle * 1.5) * transOffset;
+
+            scopeCtx.strokeStyle = '#22c55e';
+            scopeCtx.lineWidth = 2.5;
+            scopeCtx.shadowBlur = 12;
+            scopeCtx.shadowColor = '#22c55e';
+            scopeCtx.beginPath();
+
+            currentPoints.forEach((pt, i) => {
+                let nx = ((pt.x - minX) / rangeX) - 0.5;
+                let ny = ((pt.y - minY) / rangeY) - 0.5;
+
+                let rx = nx * Math.cos(rotAngle) - ny * Math.sin(rotAngle);
+                let ry = nx * Math.sin(rotAngle) + ny * Math.cos(rotAngle);
+
+                let screenX = centerX + rx * 150;
+                let screenY = centerY - ry * 150;
+
+                if (i === 0) scopeCtx.moveTo(screenX, screenY);
+                else scopeCtx.lineTo(screenX, screenY);
+
+                scopeCtx.fillStyle = '#38bdf8';
+                scopeCtx.fillRect(screenX - 3, screenY - 3, 6, 6);
+                scopeCtx.fillStyle = '#22c55e';
+            });
+
+            scopeCtx.stroke();
+            scopeCtx.shadowBlur = 0;
+        }
+    </script>
+</body>
+</html>
