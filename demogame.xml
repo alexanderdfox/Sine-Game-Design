@@ -1,0 +1,37 @@
+<?xml version="1.0"?>
+<SineGame name="SinePlatformer" width="720" height="400">
+  <!-- Player starts on the left -->
+  <Player x="70" y="280" amp="15" freq="2.0" phase="0" color="#22d3ee" flap="11"/>
+
+  <!-- Solid platforms (the "ground" pieces) -->
+  <Entity type="platform" id="ground1" x="120" y="340" amp="4" freq="0.3" phase="0" color="#64748b" width="180"/>
+  <Entity type="platform" id="ground2" x="340" y="340" amp="3" freq="0.4" phase="1" color="#64748b" width="160"/>
+  <Entity type="platform" id="ground3" x="560" y="340" amp="4" freq="0.35" phase="2" color="#64748b" width="200"/>
+
+  <!-- Floating platforms -->
+  <Entity type="platform" id="float1" x="220" y="260" amp="6" freq="0.8" phase="0" color="#94a3b8" width="100"/>
+  <Entity type="platform" id="float2" x="400" y="200" amp="5" freq="1.1" phase="1.5" color="#94a3b8" width="90"/>
+  <Entity type="platform" id="float3" x="580" y="160" amp="7" freq="0.9" phase="0.7" color="#94a3b8" width="110"/>
+  <Entity type="platform" id="float4" x="300" y="120" amp="5" freq="1.3" phase="2.2" color="#94a3b8" width="80"/>
+
+  <!-- Collectible signs (the goal items) -->
+  <Entity type="collect" id="sign1" x="220" y="220" amp="9" freq="3.0" phase="0" color="#4ade80"/>
+  <Entity type="collect" id="sign2" x="400" y="160" amp="9" freq="2.7" phase="1.2" color="#4ade80"/>
+  <Entity type="collect" id="sign3" x="580" y="120" amp="10" freq="3.3" phase="0.5" color="#4ade80"/>
+  <Entity type="collect" id="sign4" x="300" y="80" amp="8" freq="3.6" phase="2.0" color="#4ade80"/>
+  <Entity type="collect" id="sign5" x="480" y="280" amp="9" freq="2.9" phase="1.8" color="#4ade80"/>
+
+  <!-- Friendly NPC -->
+  <Entity type="npc" id="guide" x="480" y="290" amp="13" freq="1.4" phase="0.8" color="#f472b6"/>
+
+  <!-- Ambient particles -->
+  <Entity type="particle" id="sparkles" x="360" y="180" amp="55" freq="0.35" phase="0" color="#38bdf8" count="22"/>
+
+  <!-- UI text -->
+  <Message text="SINE PLATFORMER" x="210" y="32" size="24" color="#e2e8f0"/>
+  <Message text="Collect all glowing signs" x="230" y="58" size="14" color="#94a3b8"/>
+
+  <!-- Background + Music -->
+  <Background layers="4" speed="0.28"/>
+  <Music base="87" harmonics="5" tempo="0.95"/>
+</SineGame>
